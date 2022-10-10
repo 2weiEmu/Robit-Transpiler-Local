@@ -2,19 +2,11 @@
 from settings import insertIntoFile, error_types
 from re import match
 from validations import Validations as vals
+from transpileError import trnp_err
 # from robit_transpiler import RobitTranspiler as Transpiler
 
 
 # CLASS DEFINITIONS
-class trnp_err:
-    
-    def __init__(self, err_type : str, line_number : int):
-        self.err_type : str = err_type
-        self.line : int = line_number
-
-    def throw_error(self):
-        return self.err_type + " Line: " + str(self.line + 1) + "\nDescription: " + error_types[self.err_type]
-
 # Generic Class
 class BaseStatement:
     
