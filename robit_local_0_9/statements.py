@@ -4,15 +4,19 @@ from re import match
 from validations import Validations as vals
 from transpileError import trnp_err
 # from robit_transpiler import RobitTranspiler as Transpiler
-
+from LineFormat import match_format
 
 # CLASS DEFINITIONS
 # Generic Class
 class BaseStatement:
     
     def __new__(cls, line_values : list, line_num : int):
-        return object.__new__(cls)
-
+        line_format: str = ""
+        correct_format = match_format(line_format, " ".join(line_values))
+        if (correct_format[0]):
+            return object.__new__(cls)
+        else:
+            return trnp_err("syntax", line_num)
     def __init__(self, line_values : list, line_num : int):
         self.type : str = '' # Type of the statement (e.g. out, case, whatever I assume?)
         self.value : list = [] # Value of the statement
@@ -30,12 +34,19 @@ class BaseStatement:
 
 # OUTPUT STATEMENTS TRANSPILING
 class out_st(BaseStatement): 
-    
-    def __init__(self, line_values : list, line_num : int):
+
+    def __new__(cls, line_values: list, line_num: int):
+        line_format: str = "OUTPUT x"
+        correct_format = match_format(line_format, " ".join(line_values))
+        if (correct_format[0]):
+            return object.__new__(cls)
+        else:
+            return trnp_err("syntax", line_num)
+
+    def __init__(self, line_values: list, line_num: int):
         super().__init__(line_values, line_num)
         self.value : list = line_values[1:]
         self.type = "output"
-
 
     def build_to_python(self, file_name : str, tabs : int):
         tab_indent = tabs * '\t'
@@ -56,7 +67,7 @@ class if_st(BaseStatement):
             pass
         elif l_prompt in ["then", "endif", "endcase", "if"]:
             return object.__new__(cls)
-        else: 
+        else:
             return trnp_err('invalid_statement', line_num) # TODO CHECK FOR VALID IDENTIFIERS (ESPECIALLY IN THE CASE, BUT THAT DOES NOT HAVE TO HAPPEN BECAUSE THEY HAVE TO DECLARE IT AT SOME POINT AND IF THE THING THEY DECLARED IS NOT VALID< WHICH IS ALREADY CHECKED THEN THINGS SHUOLD BE FINE)
 
     def __init__(self, line_values : list, line_num : int):

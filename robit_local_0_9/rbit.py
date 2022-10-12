@@ -26,7 +26,8 @@ def main(text : str):
         else:
             latest_token = trp.token_list[-1]
 
-        # ! I'm doing this test twice because of bad returning in the find_line_token function, fix some other time, now we just test things work
+        # ! I'm doing this test twice because of bad returning,
+        # in the find_line_token function, fix some other time, now we just test things work
         # ! Make sure to fix that mess
         if isinstance(latest_token, trnp_err):
             print(latest_token.throw_error())
