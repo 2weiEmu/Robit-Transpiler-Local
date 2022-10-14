@@ -1,4 +1,2 @@
-DECLARE CARS : ARRAY[1:10] OF STRING
-CARS[0] <- "Mercedes"
-OUTPUT CARS
-OUTPUT "House"
+ a=5
+ print(a)

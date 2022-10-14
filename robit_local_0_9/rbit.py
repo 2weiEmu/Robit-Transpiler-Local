@@ -11,7 +11,7 @@ def main(text : str):
     trp : RobitTranspiler = RobitTranspiler(['text', text])
 
     # Lines are taken out of the file
-    Lines : list = trp.get_lines()
+    Lines: list = trp.get_lines()
 
     for line_count, line in enumerate(Lines):
         # Should always return latest token

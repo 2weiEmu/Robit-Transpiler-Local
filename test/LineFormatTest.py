@@ -28,75 +28,75 @@ class SimpleTest(unittest.TestCase):
 
 
     def testAssignTrue(self):
-        test = match_format("a", "house<-fish")
+        test = match_format("a_", "a<-5")
         self.assertTrue(test[0])
 
     def testInputTrue(self):
-        test = match_format("INPUT x", "INPUT fish")
+        test = match_format("INPUT x_", "INPUT fish")
         self.assertTrue(test[0])
 
     def testOutputTrue(self):
-        test = match_format("OUTPUT x", "OUTPUT house")
+        test = match_format("OUTPUT x_", "OUTPUT a")
         self.assertTrue(test[0])
 
     def testIfTrue(self):
-        test = match_format("IF b THEN", "IF x/2==0 THEN")
+        test = match_format("IF b THEN_", "IF x/2==0 THEN")
         self.assertTrue(test[0])
 
     def testElseTrue(self):
-        test = match_format("ELSE", "ELSE")
+        test = match_format("ELSE_", "ELSE")
         self.assertTrue(test[0])
 
     def testCaseOfTrue(self):
-        test = match_format("CASE OF x", "CASE OF tent")
+        test = match_format("CASE OF x_", "CASE OF tent")
         self.assertTrue(test[0])
 
     def testCaseTrue(self):
-        test = match_format("CASE x:", "CASE 10:")
+        test = match_format("CASE x:_", "CASE 10:")
         self.assertTrue(test[0])
 
     def testThenTrue(self):
-        test = match_format("THEN", "THEN")
+        test = match_format("THEN_", "THEN")
         self.assertTrue(test[0])
 
     def testEndIfTrue(self):
-        test = match_format("ENDIF", "ENDIF")
+        test = match_format("ENDIF_", "ENDIF")
         self.assertTrue(test[0])
 
     def testEndCaseTrue(self):
-        test = match_format("ENDCASE", "ENDCASE")
+        test = match_format("ENDCASE_", "ENDCASE")
         self.assertTrue(test[0])
 
     def testWhileTrue(self):
-        test = match_format("WHILE b DO", "WHILE k>0 DO")
+        test = match_format("WHILE b DO_", "WHILE k>0 DO")
         self.assertTrue(test[0])
 
     def testNextTrue(self):
-        test = match_format("NEXT", "NEXT")
+        test = match_format("NEXT_", "NEXT")
         self.assertTrue(test[0])
 
     def testEndWhileTrue(self):
-        test = match_format("ENDWHILE", "ENDWHILE")
+        test = match_format("ENDWHILE_", "ENDWHILE")
         self.assertTrue(test[0])
 
     def forNoStepTrue(self):
-        test = match_format("FOR a TO n {STEP n}", "FOR x<-0 TO fish")
+        test = match_format("FOR a TO n {STEP n}_", "FOR x<-0 TO fish")
         self.assertTrue(test[0])
 
     def forStepTrue(self):
-        test = match_format("FOR a TO n {STEP n}", "FOR x<-0 TO fish STEP 3")
+        test = match_format("FOR a TO n {STEP n}_", "FOR x<-0 TO fish STEP 3")
         self.assertTrue(test[0])
 
     def declareArrayTrue(self):
-        test = match_format("DECLARE x: ARRAY[1:n] OF t", "DECLARE cars: ARRAY[1:10] of string")
+        test = match_format("DECLARE x: ARRAY[1:n] OF t_", "DECLARE cars: ARRAY[1:10] of string")
         self.assertTrue(test[0])
 
     def repeatTrue(self):
-        test = match_format("REPEAT", "REPEAT")
+        test = match_format("REPEAT_", "REPEAT")
         self.assertTrue(test[0])
 
     def untilTrue(self):
-        test = match_format("UNTIL b", "UNTIL house = 0")
+        test = match_format("UNTIL b_", "UNTIL house = 0")
         self.assertTrue(test[0])
 
     # False Tests

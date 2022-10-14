@@ -17,7 +17,7 @@ class TranspileSyntaxException(TranspileException):
         super().__init__(message, line_number)
 
     def __str__(self):
-        return f"{self.message} -> You had a syntax error on line {self.line_number}"
+        return f"self.message -> You had a syntax error on line self.line_number"
 
 
 class TranspileWaitException(TranspileException):
