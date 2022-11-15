@@ -113,7 +113,7 @@ Create python code from syntax tree
 
 class SyntaxNode:
 
-    def __init__(self, value, transform, parent):
+    def __init__(self, value, transform, parent = None):
         self.value = value
         self.transform = transform
         self.parent = parent
