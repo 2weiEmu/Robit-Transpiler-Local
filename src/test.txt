@@ -1,4 +1,4 @@
-IF x == 5
+IF x == 5 THEN
     OUTPUT fire
 ELSE
     OUTPUT hi

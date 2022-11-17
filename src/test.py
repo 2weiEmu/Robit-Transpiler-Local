@@ -9,8 +9,6 @@ with open('test.txt', 'r') as readFile:
 
 root = SyntaxNode(value='code_root')
 
-expect_list = ['any']
-
 expected = Expected()
 
 for x, l in enumerate(lines):

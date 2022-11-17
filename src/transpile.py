@@ -31,8 +31,6 @@ class Expected:
 # should this have an 'expected' token -> for better error checking?
 def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: Expected) -> SyntaxNode:
     
-    print(f"{line_number}: {expected}")
-
     t = string.split()
     if t==[]:
         return rootNode
@@ -242,6 +240,26 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
             print(f"Syntax Error on Line {line_number}: 'WHILE' not in all capitals.")
             exit()
 
+    elif t[0].lower() == "declare":
+
+        if not(in_expected(expected, t[0])):
+            print(f"Unexpected Keyword: DECLARE, expected one of the following: {expected}")
+            exit()
+        
+        if not(is_all_caps(t[0])):
+            print(f"Syntax Error on Line {line_number}: 'DECLARE' not in all capitals.")
+            exit()
+        
+        rest_declare = " ".join(t[1:])
+        # {VARIABLE}: ARRAY[EXP:EXP] OF {TYPE}
+
+        rootNode.add_child(
+            SyntaxNode(
+                'array',
+                parent=rootNode
+            )
+        )
+        rootNode = rootNode.children[-1]
 
     # TODO: expected never seems to go to a THEN statement?
 
