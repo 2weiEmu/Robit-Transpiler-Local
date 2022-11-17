@@ -6,7 +6,7 @@ with open('test.txt', 'r') as readFile:
     l = readFile.readlines()
     lines = [c.strip() for c in l]
 
-root = SyntaxNode(value='code_root', transform='')
+root = SyntaxNode(value='code_root')
 
 expect_list = ['any']
 
@@ -16,6 +16,7 @@ for x, l in enumerate(lines):
         string=l,
         line_number=x+1, expected=expect_list
         )
+    print("Root after:", root)
 
 # go back to parent if not there:
 

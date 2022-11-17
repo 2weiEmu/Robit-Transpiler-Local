@@ -113,9 +113,8 @@ Create python code from syntax tree
 
 class SyntaxNode:
 
-    def __init__(self, value, transform, parent = None):
+    def __init__(self, value, parent = None):
         self.value = value
-        self.transform = transform
         self.parent = parent
         self.children = []
 
@@ -123,5 +122,5 @@ class SyntaxNode:
         self.children.append(new_child)
 
     def __str__(self):
-        return f"val={self.value}, transform={self.transform}\nChildren=[{f'{chr(10)}'.join([str(c) for c in self.children])}]"
+        return f"val={self.value}\nChildren=[{f'{chr(10)}'.join([str(c) for c in self.children])}]"
     

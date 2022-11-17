@@ -22,7 +22,6 @@ TODO: more strict syntax checking rules -> e.g. nothing else should be on the sa
 def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: list) -> SyntaxNode:
     
     t = string.split()
-    print(line_number, expected)
     if t==[]:
         return rootNode
     # * OUTPUT
@@ -39,7 +38,6 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: l
 
             rootNode.add_child(SyntaxNode(
                 'output',
-                "print(__allchildren)",
                 parent=rootNode
             ))
 
@@ -73,8 +71,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: l
             # yes
             
             rootNode.add_child(SyntaxNode(
-                'input'
-                "__child0 = input()",
+                'input',
                 rootNode
             ))
 
@@ -110,7 +107,6 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: l
 
         rootNode.add_child(SyntaxNode(
             'if', 
-            'if __child0:', 
             parent=rootNode
             )
         )
@@ -122,7 +118,6 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: l
         # TODO: (we actually have to add to the tree HERE)
         rootNode.add_child(SyntaxNode(
             'condition',
-            'transform',
             parent=rootNode
         ))
 
@@ -136,7 +131,6 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: l
             expected = ['any']
             rootNode.add_child(SyntaxNode(
                 'if-body',
-                '',
                 parent=rootNode
             )
             )
@@ -168,7 +162,6 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: l
         # add if-body as new child to if node
         rootNode.add_child(SyntaxNode(
             'if-body',
-            '',
             parent=rootNode
         ))
 
@@ -215,12 +208,12 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: l
 
     # TODO: expected never seems to go to a THEN statement?
 
-    if (expected == ['then']):
-        print("HI, missing a THEN, are we?")
-        exit()
+    # if (expected == ['then']):
+    #     print("HI, missing a THEN, are we?")
+    #     exit()
 
-    if (expected != ['any']):
-        print("SOMETHING WAS EXPECTED!", expected)
-        exit()
-    else:
-        return rootNode
+    # if (expected != ['any']):
+    #     print("SOMETHING WAS EXPECTED!", expected)
+    #     exit()
+    # else:
+    return rootNode
