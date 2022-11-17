@@ -9,18 +9,30 @@ def is_valid_var_or_arr_index(string: str) -> bool:
 def is_all_caps(string: str):
     return string == string.upper()
 
-def in_expected(expected: list, keyword):
-
-    return (keyword.lower() in expected or expected[0] == 'any')
-
-
 """
 TODO: more strict syntax checking rules -> e.g. nothing else should be on the same line as 'ELSE'
 """
 
-# should this have an 'expected' token -> for better error checking?
-def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: list) -> SyntaxNode:
+# I need to make sure that changing expected actually works.
+# time to make an expected object
+
+class Expected:
+
+    def __init__(self, expected_list = ['any']):
+        self.expected = expected_list
+
+    def update_expected(self, new_expected):
+        self.expected = new_expected
     
+    def __str__(self):
+        return str(self.expected)
+
+
+# should this have an 'expected' token -> for better error checking?
+def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: Expected) -> SyntaxNode:
+    
+    print(f"{line_number}: {expected}")
+
     t = string.split()
     if t==[]:
         return rootNode
@@ -49,7 +61,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: l
                 add_to_tree(
                     rootNode.children[0], 
                     s, line_number, 
-                    expected=['expression', 'string', 'var']
+                    expected=Expected(['expression', 'string', 'var'])
                     )
 
             return rootNode
@@ -76,7 +88,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: l
             ))
 
             string = string.split()
-            add_to_tree(rootNode.children[0], string[1], line_number, expected=['var'])
+            add_to_tree(rootNode.children[0], string[1], line_number, expected=Expected(['var']))
             return rootNode
 
         # not writtein all caps
@@ -105,6 +117,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: l
             print(f"Unexpected Keyword: IF, expected one of the following: {expected}")
             exit()
 
+        # add 'if' node to root
         rootNode.add_child(SyntaxNode(
             'if', 
             parent=rootNode
@@ -121,6 +134,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: l
             parent=rootNode
         ))
 
+        # is next node then node?
         if t[-1].lower() == "then":
             
             if not(is_all_caps(t[-1])):
@@ -128,7 +142,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: l
                 exit()
             
             # add if-body to if node
-            expected = ['any']
+            expected.update_expected(['any'])
             rootNode.add_child(SyntaxNode(
                 'if-body',
                 parent=rootNode
@@ -140,12 +154,10 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: l
 
         else:
             # set expected to then statement (as that was missing)
-            expected = ['then']
-            print("expecting a then next")
+            expected.update_expected(['then'])
             # return if node
             return rootNode
             
-
     # * THEN
     elif t[0].lower() == 'then':
         if not(is_all_caps(t[0])):
@@ -157,7 +169,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: l
             exit()
         
         # if found and not break -> expected back to any
-        expected = ['any']
+        expected.update_expected(['any'])
 
         # add if-body as new child to if node
         rootNode.add_child(SyntaxNode(
@@ -170,7 +182,31 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: l
 
     # * ELSE
     elif t[0].lower() == 'else':
-        pass
+
+        if not(is_all_caps(t[0])):
+            print(f"Syntax Error on Line {line_number}: 'ELSE' not in all capitals.")
+            exit()
+
+        if not(in_expected(expected, t[0])):
+            print(f"Unexpected Keyword: ELSE, expected one of the following: {expected}")
+            exit()
+        
+        if rootNode.parent.value != 'if':
+            print(f"Else statement not inside IF block, on line: {line_number}")
+            exit()
+        
+        rootNode = rootNode.parent
+
+        rootNode.add_child(
+            SyntaxNode(
+                'else-body',
+                parent=rootNode
+            )
+        )
+        rootNode = rootNode.children[2]
+
+        # return else-body
+        return rootNode
 
     # * ENDIF
     elif t[0].lower() == 'endif':
@@ -184,9 +220,9 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: l
             print(f"Unexpected Keyword: ENDIF, expected one of the following: {expected}")
             exit()
         
-        expected = ['any']
+        expected.update_expected(['any'])
         
-        # skip back to IF statement node, then to the place we were before
+        # skip back to IF statement node (from else-body or if-body), then to the place we were before
         return rootNode.parent.parent
 
     # * WHILE
@@ -206,6 +242,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: l
             print(f"Syntax Error on Line {line_number}: 'WHILE' not in all capitals.")
             exit()
 
+
     # TODO: expected never seems to go to a THEN statement?
 
     # if (expected == ['then']):
@@ -217,3 +254,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: l
     #     exit()
     # else:
     return rootNode
+
+def in_expected(expected: Expected, keyword):
+
+    return (keyword.lower() in expected.expected or expected.expected[0] == 'any')

@@ -1,3 +1,5 @@
-IF x==5
-    OUTPUT house
+IF x == 5
+    OUTPUT fire
+ELSE
+    OUTPUT hi
 ENDIF
