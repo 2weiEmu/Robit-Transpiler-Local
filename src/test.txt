@@ -1,5 +1,4 @@
-IF x == 5 THEN
-    OUTPUT fire
-ELSE
-    OUTPUT hi
+OUTPUT fish
+IF 5==x THEN
+    OUTPUT fish 
 ENDIF

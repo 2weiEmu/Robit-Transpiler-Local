@@ -11,6 +11,8 @@ def is_all_caps(string: str):
 
 """
 TODO: more strict syntax checking rules -> e.g. nothing else should be on the same line as 'ELSE'
+TODO: have to make sure that when there is an if-statement it is also closed, i.e. that there is an ENDIF, and that tabs also matter.
+But you can check on that later ->
 """
 
 # I need to make sure that changing expected actually works.
@@ -31,6 +33,10 @@ class Expected:
 # should this have an 'expected' token -> for better error checking?
 def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: Expected) -> SyntaxNode:
     
+
+    # filtering out comments
+    string = string.split("//")[0]
+
     t = string.split()
     if t==[]:
         return rootNode
@@ -38,61 +44,41 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
     # is output statement?
     if t[0].lower() == "output":
 
-        if not(in_expected(expected, t[0])):
-            print(f"Unexpected Keyword: OUTPUT, expected one of the following: {expected}")
-            exit()
-        
-        # output written in all capitals?
-        if t[0] == "OUTPUT":
-            # yes
-
-            rootNode.add_child(SyntaxNode(
+        check_standard_keyword_syntax(t[0], expected, line_number)
+ 
+        rootNode.add_child(SyntaxNode(
                 'output',
                 parent=rootNode
             ))
 
-            string = " ".join(t[1:])
-            string = string.split(",")
+        string = " ".join(t[1:])
+        string = string.split(",")
 
-            for s in string:
-                s = s.strip()
-                add_to_tree(
-                    rootNode.children[0], 
-                    s, line_number, 
-                    expected=Expected(['expression', 'string', 'var'])
-                    )
+        for s in string:
+            s = s.strip()
+            add_to_tree(
+                rootNode.children[-1], # adding to the last child of the rootnode (the one we just created)
+                s, line_number, 
+                expected=Expected(['expression', 'string', 'var'])
+                )
 
-            return rootNode
-
-        else:
-            print(f"Syntax Error on Line {line_number}: 'OUTPUT' not in all capitals.")
-            exit()
+        return rootNode
 
     # * INPUT
     # case if is input statement
     elif t[0].lower() == "input":
         
-        if not(in_expected(expected, t[0])):
-            print(f"Unexpected Keyword: INPUT, expected one of the following: {expected}")
-            exit()
+        check_standard_keyword_syntax(t[0], expected, line_number)
 
-        # input written in all caps?
-        if t[0] == "INPUT":
-            # yes
-            
-            rootNode.add_child(SyntaxNode(
+        rootNode.add_child(SyntaxNode(
                 'input',
                 rootNode
             ))
 
-            string = string.split()
-            add_to_tree(rootNode.children[0], string[1], line_number, expected=Expected(['var']))
-            return rootNode
-
-        # not writtein all caps
-        else:
-            print(f"Syntax Error on Line {line_number}: 'INPUT' not in all capitals.")
-            exit()
+        string = string.split()
+        add_to_tree(rootNode.children[-1], # adding to the newest child of the rootnode -> the one we just added
+            string[1], line_number, expected=Expected(['var']))
+        return rootNode
 
     # * ENDWHILE
     elif t[0].lower() == "endwhile":
@@ -107,13 +93,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
     # * IF-STATEMENT
     elif t[0].lower() == "if":
         
-        if not(is_all_caps(t[0])):
-            print(f"Syntax Error on Line {line_number}: 'IF' not in all capitals.")
-            exit()
-
-        if not(in_expected(expected, t[0])):
-            print(f"Unexpected Keyword: IF, expected one of the following: {expected}")
-            exit()
+        check_standard_keyword_syntax(t[0], expected, line_number)
 
         # add 'if' node to root
         rootNode.add_child(SyntaxNode(
@@ -123,7 +103,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
         )
 
         # rootNode = if node
-        rootNode = rootNode.children[0]
+        rootNode = rootNode.children[-1] # changing rootnode to the latest added node, new rootnode
 
         # add condition to if node
         # TODO: (we actually have to add to the tree HERE)
@@ -158,13 +138,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
             
     # * THEN
     elif t[0].lower() == 'then':
-        if not(is_all_caps(t[0])):
-            print(f"Syntax Error on Line {line_number}: 'THEN' not in all capitals.")
-            exit()
-
-        if not(in_expected(expected, t[0])):
-            print(f"Unexpected Keyword: IF, expected one of the following: {expected}")
-            exit()
+        check_standard_keyword_syntax(t[0], expected, line_number)
         
         # if found and not break -> expected back to any
         expected.update_expected(['any'])
@@ -181,13 +155,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
     # * ELSE
     elif t[0].lower() == 'else':
 
-        if not(is_all_caps(t[0])):
-            print(f"Syntax Error on Line {line_number}: 'ELSE' not in all capitals.")
-            exit()
-
-        if not(in_expected(expected, t[0])):
-            print(f"Unexpected Keyword: ELSE, expected one of the following: {expected}")
-            exit()
+        check_standard_keyword_syntax(t[0], expected, line_number)
         
         if rootNode.parent.value != 'if':
             print(f"Else statement not inside IF block, on line: {line_number}")
@@ -209,46 +177,296 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
     # * ENDIF
     elif t[0].lower() == 'endif':
         
-        # I know this is getting dumb -> consider putting in all caps method
-        if not(is_all_caps(t[0])):
-            print(f"Syntax Error on Line {line_number}: 'ENDIF' not in all capitals.")
-            exit()
-        
-        if not(in_expected(expected, t[0])):
-            print(f"Unexpected Keyword: ENDIF, expected one of the following: {expected}")
-            exit()
+        check_standard_keyword_syntax(t[0], expected, line_number)
         
         expected.update_expected(['any'])
         
         # skip back to IF statement node (from else-body or if-body), then to the place we were before
         return rootNode.parent.parent
+    
+    # * FOR-LOOP
+    elif t[0].lower() == 'for':
+
+        check_standard_keyword_syntax(t[0], expected, line_number)
+
+        rootNode.add_child(
+            SyntaxNode(
+                'for-loop',
+                parent=rootNode
+            )
+        )
+
+        # for-loop node
+        rootNode = rootNode.children[-1]
+
+        # FOR {VARIABLE/ARRAY_INDEX} <- {EXP} TO {EXP} [STEP {EXP}]
+        # t = [FOR, VAR/ARRAY_INDEX | <- | EXP, TO, EXP, STEP, EXP]
+        # we know for a fact that VAR/ARRAY_INDEX does not have any spaces inside
+
+        # t = [VAR/ARR<- EXP, TO, EXP -> can be any size, STEP, EXP -> can be any size, right]
+        # rest_string = VAR/ARR[]<-[]EXP TO EXP STEP EXP
+        rest_string = " ".join(t[:1])
+        
+        # halves = [VAR/ARR<-EXP, EXP STEP EXP]
+        halves = rest_string.split(" TO ") # using ' TO ' as string, because it makes sure there are spaces on either side
+
+        first_half = halves[0].split("<-")
+        var = first_half[0].strip()
+        var_exp = first_half[1].strip()
+
+        # adding the variable node
+        rootNode = add_to_tree(rootNode, var, line_number, Expected(['var']))
+
+        # adding the expression, for the starting points (starting range)
+        rootNode = add_to_tree(rootNode, var_exp, line_number, Expected(['expression']))
+
+        expressions = halves[1].split(" STEP ")
+
+        # adding where to STOP. -> don't forget that in Pseudocode both sides are inclusive, yea mate?
+        rootNode = add_to_tree(rootNode, expressions[0], line_number, Expected(['expression']))
+
+        # adding the body as a new child
+        rootNode.add_child(
+            Syntax(
+                'for-body',
+                parent=rootNode
+            )
+        )
+
+        if len(expressions) > 1:
+            rootNode = add_to_tree(rootNode, expressions[1], line_number, Expected(['expression']))
+
+        if rootNode.children[-1].value != 'for-body':
+            return rootNode.children[-2] # return the for-body if there was a STEP added
+        else:
+            return rootNode.children[-1] # otherwise return the for-body as it was the last one (if no step was added)
+
+    # * NEXT
+    elif t[0].lower() == 'next':
+
+        check_standard_keyword_syntax(t[0], expected, line_number)
+
+        # at this point the person should be in the for-body, let's see if they actually are
+        if rootNode.value != 'for-body':
+            print(f"NEXT was not inside body of FOR Statement on line {line_number}")
+            exit()
+        
+        if rootNode.parent.value != 'for-loop':
+            print(f"NEXT was not inside FOR statement on line {line_number}")
+            exit()
+
+        # go back from the for-body, to the for-loop, and then back the parent of that.
+        return rootNode.parent.parent
+
+    # * CASEOF
+    elif t[0].lower() == 'case':
+
+        check_standard_keyword_syntax(t[0], expected, line_number)
+
+        rootNode.add_child(
+            SyntaxNode(
+                'case',
+                parent=rootNode
+            )
+        )
+
+        # rootnode = CASE
+        rootNode = rootNode.children[-1]
+        # before: t = CASE OF {VAR}, now t = VAR (could also just do -1, but I have feeling like that could go wrong, a bit at least, even though technically VAR / ARR are not supposed to have spaces inside)
+        t = t[2:]
+
+        rootNode = add_to_tree(rootNode, t[0].strip(), line_number, Expected(['var']))
+
+        expected.update_expected(['case'])
+
+        # returning the CASE node
+        return rootNode
+
+    # in this case we have to check for the expected, because the line does not really have a strong identifier, for that
+    # * CASE
+    if expected.expected[0] == 'case':
+        
+        rootNode.add_child(
+            SyntaxNode(
+                'cond-body',
+                parent=rootNode
+            )
+        )
+
+        # the newest conditional body added
+        rootNode = rootNode.children[-1]
+        
+        # don't forget that string is the line ->
+        t = string.split(":")
+
+        # checking if this is the last statement
+        if (k:=t[0].strip()).lower() == 'otherwise':
+            
+            if not(is_all_caps(k)):
+                print(f"Syntax Error on line {line_number}, OTHERWISE is not written in all capitals")
+                exit()
+            
+            # rootNode = newest cond-body
+            rootNode.add_child(
+                SyntaxNode(
+                    'otherwise',
+                    parent=rootNode
+                )
+            )
+            
+            rootNode.add_child(
+                SyntaxNode(
+                    'cond-sub-body',
+                    parent=rootNode
+                )
+            )
+            # ! This technically means that you cannot actually declare arrays in CASE statements (sorry, but I don't expect anyone to do that)
+            rootNode = add_to_tree(rootNode, t[1], line_number, expected)
+
+            expected.update_expected(['endcase'])
+
+            # return the cond-sub-body
+            return rootNode.children[1]
+
+        else:
+            
+            rootNode = add_to_tree(rootNode, t[0], line_number, ['expression'])
+
+            rootNode.add_child(
+                SyntaxNode(
+                    'cond-sub-body',
+                    parent=rootNode
+                )
+            )
+            # rootnode = conditional_sub_body
+            rootNode = rootNode.children[-1]
+            rootNode = add_to_tree(rootNode, t[1].strip(), line_number, expected)
+
+            # cond-sub-body -> cond-body -> case, which is where the next statement has to be added again
+            return rootNode.parent.parent
+
+    # * ENDCASE
+    elif t[0].lower() == 'endcase':
+
+        check_standard_keyword_syntax(t[0], expected, line_number)
+        
+        expected.update_expected(['any'])
+
+        if rootNode.value != 'cond-sub-body':
+            print(f"ENDCASE not while inside a condition case statement on line: {line_number}")
+            exit()
+
+        if rootNode.parent.value != 'cond-body':
+            print(f"ENDCASE not inside a CASE statement on line: {line_number}")
+            exit()
+
+        # from cond-sub-body -> cond-body -> case -> root before that.
+        return rootNode.parent.parent.parent
+
+    # * REPEAT
+    elif t[0].lower() == 'repeat':
+
+        check_standard_keyword_syntax(t[0], expected, line_number)
+
+        # create a new repeat child for the main branch thing
+        rootNode.add_child(
+            SyntaxNode(
+                value='repeat',
+                parent=rootNode
+            )
+        )
+
+        # move rootnode to that repeat branch
+        rootNode = rootNode.children[-1]
+
+        # create new body for that repeat branch
+        rootNode.add_child(
+            SyntaxNode(
+                'repeat-body',
+                parent=rootNode
+            )
+        )
+
+        # return the repeat-body as part of the branch
+        return rootNode.children[-1]
+
+    # * UNTIL
+    elif t[0].lower() == 'until':
+
+        check_standard_keyword_syntax(t[0], expected, line_number)
+
+        # rootnode should in this case be a repeat-body, and the parent of that a repeat node (though they technically come in pairs, but still better to make sure)
+        
+        if rootNode.value != 'repeat-body':
+            print(f"UNTIL statement not in the body of a REPEAT statement on line: {line_number}")
+            exit()
+
+        if rootNode.parent.value != 'repeat':
+            print(f"UNTIL not in a REPEAT statement on line: {line_number}")
+            exit()
+
+        # back to the repeat node
+        rootNode = rootNode.parent
+
+        rest_of_statement = "".join(t[1:])
+
+        rootNode = add_to_tree(rootNode, rest_of_statement, line_number, Expected(['condition']))
+
+        # return the parent of the repeat statemnt, i.e the one that came before the repeat statement
+        return rootNode.parent
 
     # * WHILE
     # case if is while statement
     elif t[0].lower() == "while":
 
-        if not(in_expected(expected, t[0])):
-            print(f"Unexpected Keyword: WHILE, expected one of the following: {expected}")
+        check_standard_keyword_syntax(t[0], expected, line_number)
+
+        rootNode.add_child(
+            SyntaxNode(
+                'while',
+                parent=rootNode
+            )
+        )
+
+        check_standard_keyword_syntax(t[-1], Expected(['do']), line_number)
+        
+        rest_string = " ".join(t[1:-1])
+
+        # rootnode = WHILE node
+        rootNode = rootNode.children[-1]
+
+        # adding condition as new node to WHILE node
+        rootNode = add_to_tree(rootNode, rest_string, line_number, Expected(['condition']))
+
+        # adding the while-body as a new node to WHILE node
+        rootNode.add_child(
+            SyntaxNode(
+                'while-body',
+                parent=rootNode
+            )   
+        )
+
+        return rootNode.children[-1] # returning the while-body
+
+    # * ENDWHILE
+    elif t[0].lower() == "endwhile":
+
+        check_standard_keyword_syntax(t[0], expected, line_number)
+
+        if rootNode.value != 'while-body':
+            print(f"ENDWHILE on line {line_number} is not in a WHILE statement body.")
             exit()
 
-        # WHILE writtein in all caps?
-        if t[0] == "WHILE":
-            # yes
-            pass
+        if rootNode.parent.value != 'while':
+            print(f"ENDWHILE on line {line_number} is not in WHILE statement.")
+        
+        # going back to parent of the while statement (current rootNode = while-body)
+        return rootNode.parent.parent
 
-        else:
-            print(f"Syntax Error on Line {line_number}: 'WHILE' not in all capitals.")
-            exit()
-
+    # * DECLARE
     elif t[0].lower() == "declare":
 
-        if not(in_expected(expected, t[0])):
-            print(f"Unexpected Keyword: DECLARE, expected one of the following: {expected}")
-            exit()
-        
-        if not(is_all_caps(t[0])):
-            print(f"Syntax Error on Line {line_number}: 'DECLARE' not in all capitals.")
-            exit()
+        check_standard_keyword_syntax(t[0], expected, line_number)
         
         rest_declare = " ".join(t[1:])
         # {VARIABLE}: ARRAY[EXP:EXP] OF {TYPE}
@@ -259,7 +477,27 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
                 parent=rootNode
             )
         )
+        # rootnode = array node
         rootNode = rootNode.children[-1]
+                                #012345
+        # rest_declare = [{VAR}, ARRAY[EXP, EXP] OF {TYPE}]
+        rest_declare = rest_declare.split(":")
+
+        rest_declare[0] = rest_declare[0].strip() # making sure the variable has no trailing or leading useless stuff
+        rootNode = add_to_tree(rootNode, rest_declare[0], line_number, Expected(['var']))
+
+        rest_declare[1] = (rest_declare[1].strip())[6:] # stripping and cutting off 'ARRAY[' part
+        rootNode = add_to_tree(rootNode, rest_declare[1], line_number, Expected(['expression']))
+
+        # temporary = [EXP, OF {TYPE}]
+        temporary = (rest_declare[2].strip()).split(']')
+        rootNode = add_to_tree(rootNode, temporary[0], line_number, Expected(['expression']))
+
+        rootNode = add_to_tree(rootNode, (temporary[1].strip())[3:], line_number, Expected(['type']))
+
+        rootNode = rootNode.parent
+        return rootNode
+    
 
     # TODO: expected never seems to go to a THEN statement?
 
@@ -276,3 +514,15 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
 def in_expected(expected: Expected, keyword):
 
     return (keyword.lower() in expected.expected or expected.expected[0] == 'any')
+
+def check_standard_keyword_syntax(keyword: str, expected: Expected, line_number: int) -> bool: 
+    
+    if not(is_all_caps(keyword)):
+        print(f"Syntax Error on Line {line_number}: '{keyword.upper()}' not in all capitals.")
+        exit()
+    
+    if not(in_expected(expected, keyword)):
+        print(f"Unexpected Keyword: {keyword.upper()} on line {line_number}, instead expected one of the following: {expected}")
+        exit()
+    
+    return True

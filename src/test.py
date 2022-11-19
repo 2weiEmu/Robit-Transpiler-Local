@@ -3,6 +3,8 @@ from SyntaxNode import *
 from transpile import *
 from build_from_tree import build_lines_from_tree
 
+import os
+
 with open('test.txt', 'r') as readFile:
     l = readFile.readlines()
     lines = [c.strip() for c in l]
@@ -10,6 +12,8 @@ with open('test.txt', 'r') as readFile:
 root = SyntaxNode(value='code_root')
 
 expected = Expected()
+
+os.system('clear')
 
 for x, l in enumerate(lines):
     root = add_to_tree(
@@ -21,7 +25,7 @@ for x, l in enumerate(lines):
 
 # go back to parent if not there:
 
-# print(root)
+print(root)
 
 lines = build_lines_from_tree(root)
 # lines = [l + "\n" for l in lines]
