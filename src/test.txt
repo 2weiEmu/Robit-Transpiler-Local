@@ -1,4 +1,4 @@
-OUTPUT fish
-IF 5==x THEN
-    OUTPUT fish 
+
+IF (car AND fish) AND house THEN
+    OUTPUT "tank"
 ENDIF

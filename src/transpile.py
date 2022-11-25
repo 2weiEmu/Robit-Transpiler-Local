@@ -29,6 +29,9 @@ class Expected:
     def __str__(self):
         return str(self.expected)
 
+# TODO: tab checking implementation
+# TODO: endif / endcase / endwhile checking implementation
+# I Think the EXPECTED() thing will just need more logic for that
 
 # should this have an 'expected' token -> for better error checking?
 def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: Expected) -> SyntaxNode:
@@ -106,11 +109,13 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
         rootNode = rootNode.children[-1] # changing rootnode to the latest added node, new rootnode
 
         # add condition to if node
-        # TODO: (we actually have to add to the tree HERE)
-        rootNode.add_child(SyntaxNode(
-            'condition',
-            parent=rootNode
-        ))
+
+        temp = t[1:]
+        if temp[-1].lower() == 'then':
+            temp = temp[:-1]
+        condition_string = " ".join(temp)
+
+        rootNode = add_to_tree(rootNode, condition_string, line_number, Expected(['condition']))
 
         # is next node then node?
         if t[-1].lower() == "then":
@@ -122,7 +127,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
             # add if-body to if node
             expected.update_expected(['any'])
             rootNode.add_child(SyntaxNode(
-                'if-body',
+                'if-body',  
                 parent=rootNode
             )
             )
@@ -498,18 +503,260 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
         rootNode = rootNode.parent
         return rootNode
     
+    # * ASSIGNMENT
+    elif "<-" in string:
 
-    # TODO: expected never seems to go to a THEN statement?
+        if not(in_expected(expected, 'assignment')):
+            print(f"Unexpected Assignment on line {line_number}, instead expected: {expected.expected}")
+            exit()
 
-    # if (expected == ['then']):
-    #     print("HI, missing a THEN, are we?")
-    #     exit()
+        rootNode.add_child(
+            SyntaxNode(
+                'assignment'
+            )
+        )
 
-    # if (expected != ['any']):
-    #     print("SOMETHING WAS EXPECTED!", expected)
-    #     exit()
-    # else:
+        # making assignment node the new root
+        rootNode = rootNode.children[-1]
+
+        values = string.split("<-")
+
+        if not(is_valid_var_or_arr_index(values[0])):
+            print(f"Variable to be assigned to, on line {line_number} does not have a valid format.")
+            exit()
+
+        rootNode = add_to_tree(rootNode, values[0], line_number, Expected(['var']))
+
+        rootNode = add_to_tree(rootNode, values[1], line_number, Expected('expression', 'string', 'var'))
+
+        return rootNode.parent # Return the parent of the assignment node
+
+    # * TYPES
+    elif string.lower() in ['integer', 'char', 'real', 'string', 'boolean']:
+
+
+        if not(is_all_caps(string)):
+            print(f"The type given on {line_number} was not in all capitals.")
+            exit()
+        
+        if not(in_expected(expected, 'type')):
+            print(f"Unexpected type on line {line_number}")
+            exit()
+        
+        rootNode.add_child(
+            SyntaxNode(
+                f'type-{string.lower}',
+                parent=rootNode
+            )
+        )
+
+        return rootNode
+
+    # * STRINGS
+    # ! The guide says nothing about string concanetation using +, so I will not implement this.
+    elif "'" in string or '"' in string:
+
+        if not(in_expected(expected, 'string')):
+            print(f"Unexpected STRING on line: {line_number}, instead expected: {expected.expected}")
+            exit()
+
+        string = string.strip()
+        if "'" in string:
+            if string[0] != string[-1] or string[0] != "'":
+                print(f"String not of valid format, it does not both begin and end with ' or \" on line {line_number}")
+                exit()
+            
+        if '"' in string:
+            if string[0] != string[-1] or string[0] != '"':
+                print(f"String not of valid format, it does not both begin and end with ' or \" on line {line_number}")
+                exit()
+
+
+        if string[0] in string[1:-1]:
+            print(f"You used too many ' or \" symbols in the body of your string.")
+            exit()
+        
+        rootNode.add_child(
+            SyntaxNode(
+                f'string-{string[1:-1]}',
+                parent=rootNode
+            )
+        )
+
+        return rootNode
+
+    # * CONDITION
+    # ok wait, seeing as we use '=' to check for equality here, we can actually check for that, and the other symbols as they are also unique to this, and other places where it could have come up were already checked
+    # ! don't forget that in booleans here != actually is written as <>
+    elif contains_bool_op(string):
+        
+        if not(in_expected(expected, 'condition')):
+            print(f"Unexpected CONDITION on line {line_number}, instead expected one of: {expected.expected}")
+            exit()
+
+        # ! time to care about brackets.
+        # ! there may also be issues that occur when putting lone values directly inside brackets i.e. like 5 <> (CAR), don't do that
+        # ! may contain numbers as immediate values -> but not strings
+
+        # making sure that the given string has the right amount of brackets
+        if string.count("(") != string.count(")"):
+            print(f"You have unmatched brackets in your condition on line: {line_number}")
+            exit()
+
+        t_string = string
+
+        while (t_string[0] == "(" and t_string[-1] == ")"):
+            t_string = t_string[1:-1]
+        
+        key_values = split_first_bool_op(t_string)
+        
+        rootNode.add_child(
+            SyntaxNode(
+                f'condition-{key_values[0]}',
+                parent=rootNode
+            )
+        )
+
+        rootNode = add_to_tree(rootNode, key_values[1].strip(), line_number, Expected(['condition', 'expression', 'var']))
+        rootNode = add_to_tree(rootNode, key_values[2].strip(), line_number, Expected(['condition', 'expression', 'var']))
+
+        return rootNode
+
+    # * EXPRESSIONS
+    elif contains_exp_op(string):
+        
+        if not(in_expected(expected, 'expression')):
+            print(f"Unexpected EXPRESSION on line {line_number}, instead expected one of: {expected.expected}")
+            exit()
+        
+        if string.count("(") != string.count(")"):
+            print(f"You have unmatched brackets in your expression on line: {line_number}")
+            exit()
+        
+        t_string = string
+
+        while (t_string[0] == "(" and t_string[-1] == ")"):
+            t_string = t_string[1:-1]
+        
+        # this one should actually kinda follow the rules of BEDMAS, like such: Division, DIV, Multiply, Add, Sub, MOD (this means reverse order for the split function array)
+        key_values = split_first_exp_op(t_string) # TODO: combine both instances of these into 1 method, with  the bool op and exp op, because like, yes, they just kinda use diff arrays.
+
+        rootNode.add_child(
+            SyntaxNode(
+                f'exp-{key_values[0]}',
+                parent=rootNode
+            )
+        )
+
+        rootNode = add_to_tree(rootNode, key_values[1].strip(), line_number, Expected(['var', 'expression']))
+        rootNode = add_to_tree(rootNode, key_values[2].strip(), line_number, Expected(['var', 'expression']))
+
+        return rootNode
+    
+    # * VARIABLE
+    elif is_valid_var_or_arr_index(string):
+
+        if not(in_expected(expected, 'var')):
+            print(f"Unexpected VARIABLE on line {line_number}, instead expected one of: {expected.expected}")
+            exit()
+        
+        rootNode.add_child(
+            SyntaxNode(
+                f'var-{string.strip()}',
+                parent=rootNode
+            )
+        )
+        
+        return rootNode
+    # Now the missing statements:
+    # variables -> we already have a variable check thing
+
+    # * if its nothing valid, we just kinda skip... I guess...
     return rootNode
+
+def split_first_exp_op(source: str) -> list:
+    valid_exps = ["MOD", "-", "+", "*", "DIV", "/"]
+    
+    for operator in valid_exps:
+        nesting = 0
+        for x in range(len(source) - (len(operator) - 1)):
+            
+            if (source[x] == ")"):
+                nesting -= 1
+            if (source[x] == "("):
+                nesting += 1
+
+            if (source[x:x+len(operator)] == operator and nesting == 0):
+
+                return [operator, source[:x], source[x+len(operator):]]
+
+def contains_exp_op(string: str) -> bool:
+    valid_exp_ops = ["*", "-", "+", "/", "MOD", "DIV"]
+
+    for op in valid_exp_ops:
+        if op in string:
+            return True
+
+    return False
+
+
+#  list as: [OP, first_half, second_half]
+def split_first_bool_op(source: str) -> list:
+    valid_booleans = ['=', 'OR', 'NOT', '>', '<', '<=', '>=', 'AND', '<>']
+    # ! have to make sure its not in a bracket
+
+    # ? The way I do it here means that boolean operators have a certain precedence
+    # ? the precedence is as in the array, with = having the highest one
+    # ? this is because it would first match the latest and, before matching a AND for example.
+    # TODO: Make sure to note this / make it clear to people!
+
+    # TODO: Add error checking, in case the statement brakes somehow, technically entering (( CAR AND FISH) )
+    # TODO: could break this mechanism (which probably means im not doing it right, let's be real)
+    # TODO: and even if I added .strip() this would still break it: ((car AND) fish)
+    # TODO: now we can fight over if that would be a valid statement.
+
+    # basically make sure that it does not take into account things inside a bracket (i.e. nested)
+    for operator in valid_booleans:
+        nesting = 0
+        for x in range(len(source) - (len(operator) - 1)):
+            
+            if (source[x] == ")"):
+                nesting -= 1
+            if (source[x] == "("):
+                nesting += 1
+
+            if (source[x:x+len(operator)] == operator and nesting == 0):
+
+                return [operator, source[:x], source[x+len(operator):]]
+                
+    
+
+
+def find_close_index(start: int, string: str) -> int:
+
+    give: int = 0
+
+    for x, c in enumerate(string[start:]):
+        if c == "(":
+            give += 1
+        if c == ")":
+            give -= 1
+        
+        if give == 0:
+            return start + x
+    return -1
+
+
+def contains_bool_op(string: str) -> bool:
+
+    # all the valid boolean operators (<> = !=)
+    valid_booleans = ['AND', 'OR', 'NOT', '>', '<', '<=', '>=', '=', '<>', 'TRUE', 'FALSE']
+
+    for v in valid_booleans:
+        if v in string:
+            return True
+
+    return False
 
 def in_expected(expected: Expected, keyword):
 
