@@ -22,7 +22,7 @@ def build_lines_from_tree(c: SyntaxNode) -> str:
 
         build_string += c.value[7:]
 
-        build_string += "\\n\""
+        build_string += "<br\\>\""
 
         return build_string
 

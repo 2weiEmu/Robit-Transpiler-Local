@@ -1,2 +1,1 @@
-OUTPUT "people will use this"
-OUTPUT "more string here hehehehehe"
+OUTPUT "there is actually some nice progress here"

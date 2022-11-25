@@ -1,2 +1,1 @@
-document.getElementById("output").innerHTML +="people will use this\\n";
-document.getElementById("output").innerHTML +="more string here hehehehehe\\n";
+document.getElementById("output").innerHTML +="there is actually some nice progress here<br\>";
