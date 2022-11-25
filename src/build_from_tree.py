@@ -1,30 +1,32 @@
 from SyntaxNode import SyntaxNode
 
-def build_line_from_node(root: SyntaxNode) -> str:
-    line = ""
-
+def build_lines_from_tree(c: SyntaxNode) -> str:
+    
     # * OUTPUT
-    if root.value == 'output':
-        
-        outVals = [build_line_from_node(c) for c in root.children]
+    if c.value == "output":
 
-        return f"print({','.join(outVals)})\n"
-    
-    if root.value == 'if':
+        build_string = "document.getElementById(\"output\").innerHTML +="
+        for k in c.children:
+            build_string += build_lines_from_tree(k)
+        build_string += ";\n"
+
+
+        return build_string
+
+    # 0123456
+    # string-
+    # * STRING
+    elif c.value[:7] == 'string-':
+
+        build_string = "\""
+
+        build_string += c.value[7:]
+
+        build_string += "\\n\""
+
+        return build_string
+
+    # * INPUT
+    elif c.value == "input":
+
         pass
-
-    if root.value.startswith("var"):
-        return root.value[3:]
-
-    return ""
-
-def build_lines_from_tree(root: SyntaxNode) -> list:
-    lines = []
-    # Moving through LRP navigation
-    for c in root.children:
-
-        if c.value == 'output':
-            
-            lines.append(build_line_from_node(c))
-    
-    return lines

@@ -26,10 +26,13 @@ for x, l in enumerate(lines):
 # go back to parent if not there:
 
 print(root)
+l = []
+for c in root.children:
+    lines = build_lines_from_tree(c)
+    print("Lines", lines)
+    l.append(lines)
 
-lines = build_lines_from_tree(root)
-# lines = [l + "\n" for l in lines]
+print(l)
 
-with open("temp.py", "w") as pythonTemp:
-    pythonTemp.writelines(lines)
-
+with open("temp.js", "w") as javascript:
+    javascript.writelines(l)

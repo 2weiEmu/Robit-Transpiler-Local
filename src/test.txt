@@ -1,4 +1,2 @@
-
-IF (car AND fish) AND house THEN
-    OUTPUT "tank"
-ENDIF
+OUTPUT "people will use this"
+OUTPUT "more string here hehehehehe"
