@@ -62,7 +62,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
             add_to_tree(
                 rootNode.children[-1], # adding to the last child of the rootnode (the one we just created)
                 s, line_number, 
-                expected=Expected(['expression', 'string', 'var'])
+                expected=Expected(['expression', 'string', 'var', 'condition'])
                 )
 
         return rootNode
@@ -512,7 +512,8 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
 
         rootNode.add_child(
             SyntaxNode(
-                'assignment'
+                'assignment',
+                parent=rootNode
             )
         )
 
@@ -525,9 +526,11 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
             print(f"Variable to be assigned to, on line {line_number} does not have a valid format.")
             exit()
 
-        rootNode = add_to_tree(rootNode, values[0], line_number, Expected(['var']))
+        print(values[0].strip())
+        print(values[1].strip())
+        rootNode = add_to_tree(rootNode, values[0].strip(), line_number, Expected(['var']))
 
-        rootNode = add_to_tree(rootNode, values[1], line_number, Expected('expression', 'string', 'var'))
+        rootNode = add_to_tree(rootNode, values[1].strip(), line_number, Expected(['expression', 'string', 'var']))
 
         return rootNode.parent # Return the parent of the assignment node
 
@@ -582,9 +585,11 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
                 parent=rootNode
             )
         )
-
         return rootNode
 
+    # ! GOOD that we check for conditions first, then expressions, which means that the two following statements will evaluate to the same thing (and that the second one won't break):
+    # 5 + 5 = 1
+    # 1 = 5 + 5
     # * CONDITION
     # ok wait, seeing as we use '=' to check for equality here, we can actually check for that, and the other symbols as they are also unique to this, and other places where it could have come up were already checked
     # ! don't forget that in booleans here != actually is written as <>
@@ -617,10 +622,12 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
             )
         )
 
+        rootNode = rootNode.children[-1]
+
         rootNode = add_to_tree(rootNode, key_values[1].strip(), line_number, Expected(['condition', 'expression', 'var']))
         rootNode = add_to_tree(rootNode, key_values[2].strip(), line_number, Expected(['condition', 'expression', 'var']))
 
-        return rootNode
+        return rootNode.parent
 
     # * EXPRESSIONS
     elif contains_exp_op(string):
@@ -648,16 +655,32 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
             )
         )
 
+        rootNode = rootNode.children[-1]
+
         rootNode = add_to_tree(rootNode, key_values[1].strip(), line_number, Expected(['var', 'expression']))
         rootNode = add_to_tree(rootNode, key_values[2].strip(), line_number, Expected(['var', 'expression']))
 
-        return rootNode
+        return rootNode.parent
     
+    # * NUMERIC VALUE
+    elif match("^[0-9]+$", string):
+        
+        if not(in_expected(expected, 'expression')):
+            print(f"Unexpected CONSTANT on line {line_number}, instead expected one of: {expected.expected}")
+            exit()
+
+        rootNode.add_child(
+            SyntaxNode(
+                f"constant-{string}",
+                parent=rootNode
+            )
+        )
+
     # * VARIABLE
     elif is_valid_var_or_arr_index(string):
 
         if not(in_expected(expected, 'var')):
-            print(f"Unexpected VARIABLE on line {line_number}, instead expected one of: {expected.expected}")
+            print(f"Unexpected VARIABLE ({string}) on line {line_number}, instead expected one of: {expected.expected}")
             exit()
         
         rootNode.add_child(
@@ -702,7 +725,9 @@ def contains_exp_op(string: str) -> bool:
 
 #  list as: [OP, first_half, second_half]
 def split_first_bool_op(source: str) -> list:
-    valid_booleans = ['=', 'OR', 'NOT', '>', '<', '<=', '>=', 'AND', '<>']
+    # ! <> has to have higher precedence or it selects < first, or > same goes for <= and >=
+    # TODO: come up with a better algorithm for splitting this string, because right now, this has some very specific criteria under which it works, which it should really not have
+    valid_booleans = ['OR', 'NOT', '<>', '<=', '>=', '=', '>', '<', 'AND']
     # ! have to make sure its not in a bracket
 
     # ? The way I do it here means that boolean operators have a certain precedence

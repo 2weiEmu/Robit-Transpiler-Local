@@ -3,18 +3,35 @@
 
 <html>
 
-    <header>
+    <head>
         <title>Local Robit Transpiler Test</title>
-    </header>
+        <style>
+            p {
+                padding: 0;
+                margin: 0;
+            }
+        </style>
+    </head>
 
     <body>
-        <div id="output", style="font-family: monospace; font-size: 1.3rem;">
+        <textarea placeholder="Enter code here..." style="width: 40%; height: 500px;">
+
+        </textarea>
+        <br>
+        <button id="transpile", style="width: 20%;">Transpile</button>
+        <button id="run" style="width: 20%;">Run Code</button>
+        <br><br>
+        <div>
+
+        </div>
+        <!-- TODO: Still need to make this scrollabe instead of just infinitely expanding -->
+        <div id="output", style="font-family: monospace; font-size: 1.3rem; background-color: darkslategray; min-height: 300px; width: 800px; padding: 10px;">
             
         </div>
     </body>
 
-    <footer>
+    <foot>
         <script src="temp.js"></script>
-    </footer>
+    </foot>
 
 </html>

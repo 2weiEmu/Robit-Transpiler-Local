@@ -26,13 +26,14 @@ for x, l in enumerate(lines):
 # go back to parent if not there:
 
 print(root)
-l = []
+l = ["let btn = document.getElementById('run');\nbtn.addEventListener('click', event=> { code(); });\nfunction code() {\n"]
+l.append("\ndocument.getElementById('output').innerHTML=\"\";\n")
 for c in root.children:
     lines = build_lines_from_tree(c)
     print("Lines", lines)
     l.append(lines)
 
 print(l)
-
+l.append("\n}")
 with open("temp.js", "w") as javascript:
     javascript.writelines(l)
