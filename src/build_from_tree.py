@@ -46,6 +46,7 @@ def build_lines_from_tree(c: SyntaxNode, exist_vars: VarKeeper) -> str:
     elif c.value[:4] == "var-":
         return f"{c.value[4:]}"
     
+    # TODO: Else statements!!!!!!
     # * IF-STATEMENT
     elif c.value == 'if':
 
