@@ -1,5 +1,8 @@
+INPUT k
 
-FOR X <- 0 TO 6 STEP 2
-    OUTPUT "Xs current value is:"
-    OUTPUT X
+FOR x <- 0 TO k
+    IF x MOD 2 = 0 THEN
+        OUTPUT "x is even"
+        OUTPUT x
+    ENDIF
 NEXT

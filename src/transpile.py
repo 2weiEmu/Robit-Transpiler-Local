@@ -221,12 +221,12 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
         rootNode = add_to_tree(rootNode, var, line_number, Expected(['var']))
 
         # adding the expression, for the starting points (starting range)
-        rootNode = add_to_tree(rootNode, var_exp, line_number, Expected(['expression']))
+        rootNode = add_to_tree(rootNode, var_exp, line_number, Expected(['var', 'expression']))
 
         expressions = halves[1].split(" STEP ")
 
         # adding where to STOP. -> don't forget that in Pseudocode both sides are inclusive, yea mate?
-        rootNode = add_to_tree(rootNode, expressions[0], line_number, Expected(['expression']))
+        rootNode = add_to_tree(rootNode, expressions[0], line_number, Expected(['var','expression']))
 
         # adding the body as a new child
         rootNode.add_child(
