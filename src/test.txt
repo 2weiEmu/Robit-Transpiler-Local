@@ -1,7 +1,5 @@
-INPUT n
-WHILE n < 5 DO
-    OUTPUT "Iteration"
-    OUTPUT n
-    n <- n + 2
-ENDWHILE
-OUTPUT n
+
+FOR X <- 0 TO 6 STEP 2
+    OUTPUT "Xs current value is:"
+    OUTPUT X
+NEXT

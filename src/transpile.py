@@ -210,11 +210,9 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
 
         # t = [VAR/ARR<- EXP, TO, EXP -> can be any size, STEP, EXP -> can be any size, right]
         # rest_string = VAR/ARR[]<-[]EXP TO EXP STEP EXP
-        rest_string = " ".join(t[:1])
-        
+        rest_string = " ".join(t[1:])
         # halves = [VAR/ARR<-EXP, EXP STEP EXP]
         halves = rest_string.split(" TO ") # using ' TO ' as string, because it makes sure there are spaces on either side
-
         first_half = halves[0].split("<-")
         var = first_half[0].strip()
         var_exp = first_half[1].strip()
@@ -232,7 +230,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
 
         # adding the body as a new child
         rootNode.add_child(
-            Syntax(
+            SyntaxNode(
                 'for-body',
                 parent=rootNode
             )
@@ -263,31 +261,6 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
         # go back from the for-body, to the for-loop, and then back the parent of that.
         return rootNode.parent.parent
 
-    # * CASEOF
-    elif t[0].lower() == 'case':
-
-        check_standard_keyword_syntax(t[0], expected, line_number)
-
-        rootNode.add_child(
-            SyntaxNode(
-                'case',
-                parent=rootNode
-            )
-        )
-
-        # rootnode = CASE
-        rootNode = rootNode.children[-1]
-        # before: t = CASE OF {VAR}, now t = VAR (could also just do -1, but I have feeling like that could go wrong, a bit at least, even though technically VAR / ARR are not supposed to have spaces inside)
-        t = t[2:]
-
-        rootNode = add_to_tree(rootNode, t[0].strip(), line_number, Expected(['var']))
-
-        expected.update_expected(['case'])
-
-        # returning the CASE node
-        return rootNode
-
-    # in this case we have to check for the expected, because the line does not really have a strong identifier, for that
     # * CASE
     if expected.expected[0] == 'case':
         
@@ -335,7 +308,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
 
         else:
             
-            rootNode = add_to_tree(rootNode, t[0], line_number, ['expression'])
+            rootNode = add_to_tree(rootNode, t[0].split()[1], line_number, Expected(['var', 'expression']))
 
             rootNode.add_child(
                 SyntaxNode(
@@ -349,6 +322,33 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
 
             # cond-sub-body -> cond-body -> case, which is where the next statement has to be added again
             return rootNode.parent.parent
+
+
+    # * CASEOF
+    elif t[0].lower() == 'case':
+
+        check_standard_keyword_syntax(t[0], expected, line_number)
+
+        rootNode.add_child(
+            SyntaxNode(
+                'case',
+                parent=rootNode
+            )
+        )
+
+        # rootnode = CASE
+        rootNode = rootNode.children[-1]
+        # before: t = CASE OF {VAR}, now t = VAR (could also just do -1, but I have feeling like that could go wrong, a bit at least, even though technically VAR / ARR are not supposed to have spaces inside)
+        t = t[2:]
+
+        rootNode = add_to_tree(rootNode, t[0].strip(), line_number, Expected(['var']))
+
+        expected.update_expected(['case'])
+
+        # returning the CASE node
+        return rootNode
+
+    # in this case we have to check for the expected, because the line does not really have a strong identifier, for that
 
     # * ENDCASE
     elif t[0].lower() == 'endcase':
