@@ -175,7 +175,7 @@ def build_lines_from_tree(c: SyntaxNode, exist_vars: VarKeeper) -> str:
 
         before = exist_vars.existed_before(var_to_build)
 
-        build_string = f"for ({'var' * (not(before))} {var_to_build} = {start_pos}; {var_to_build} < {end_pos} + 1;"
+        build_string = f"for ({'var' * (not(before))} {var_to_build} = parseInt({start_pos}); {var_to_build} < parseInt({end_pos}) + 1;"
         build_string += f"{var_to_build} += {step})"
         build_string += "{\n"
         build_string += body + "}\n"
