@@ -3,13 +3,13 @@ btn.addEventListener('click', event=> { code(); });
 function code() {
 
 document.getElementById('output').innerHTML="";
-var k = prompt('Input', 'Your input...');
-for (var x = parseInt(0); x < parseInt(k) + 1;x += 1){
-if (((parseInt(x) % parseInt(3)) == 0)) {
-document.getElementById("output").innerHTML +="x is a multiple of 3"+"<br>";
-
-document.getElementById("output").innerHTML +=x+"<br>";
+var x = 5;
+if ((x == 5)) {
+document.getElementById("output").innerHTML +=(parseInt(5) + parseInt(3))+"<br>";
 }
+else {
+document.getElementById("output").innerHTML +=10+"<br>";
+
 }
 
 }

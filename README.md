@@ -88,6 +88,5 @@ A condition can be constructed using the comparison and boolean operators `AND`,
 
 ## How to use
 
-### How to use the Library
 
 ## The Works

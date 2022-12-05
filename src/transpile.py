@@ -2,7 +2,6 @@ from re import match
 
 from SyntaxNode import *
 
-
 def is_valid_var_or_arr_index(string: str) -> bool:
     return match("[a-zA-Z0-9\[\]]", string)
 
@@ -36,7 +35,6 @@ class Expected:
 # should this have an 'expected' token -> for better error checking?
 def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: Expected) -> SyntaxNode:
     
-
     # filtering out comments
     string = string.split("//")[0]
 
@@ -299,7 +297,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
                 )
             )
             # ! This technically means that you cannot actually declare arrays in CASE statements (sorry, but I don't expect anyone to do that)
-            rootNode = add_to_tree(rootNode, t[1], line_number, expected)
+            rootNode = add_to_tree(rootNode, t[1], line_number, Expected(['any']))
 
             expected.update_expected(['endcase'])
 
@@ -307,8 +305,8 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
             return rootNode.children[1]
 
         else:
-            
-            rootNode = add_to_tree(rootNode, t[0].split()[1], line_number, Expected(['var', 'expression']))
+            print(f"t -> {t}")
+            rootNode = add_to_tree(rootNode, t[0], line_number, Expected(['var', 'expression']))
 
             rootNode.add_child(
                 SyntaxNode(
@@ -318,11 +316,10 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
             )
             # rootnode = conditional_sub_body
             rootNode = rootNode.children[-1]
-            rootNode = add_to_tree(rootNode, t[1].strip(), line_number, expected)
+            rootNode = add_to_tree(rootNode, t[1].strip(), line_number, Expected(['any']))
 
             # cond-sub-body -> cond-body -> case, which is where the next statement has to be added again
             return rootNode.parent.parent
-
 
     # * CASEOF
     elif t[0].lower() == 'case':
@@ -341,7 +338,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
         # before: t = CASE OF {VAR}, now t = VAR (could also just do -1, but I have feeling like that could go wrong, a bit at least, even though technically VAR / ARR are not supposed to have spaces inside)
         t = t[2:]
 
-        rootNode = add_to_tree(rootNode, t[0].strip(), line_number, Expected(['var']))
+        rootNode = add_to_tree(rootNode, t[0].strip(), line_number, Expected(['var', 'expression']))
 
         expected.update_expected(['case'])
 
@@ -349,7 +346,6 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
         return rootNode
 
     # in this case we have to check for the expected, because the line does not really have a strong identifier, for that
-
     # * ENDCASE
     elif t[0].lower() == 'endcase':
 
@@ -722,7 +718,6 @@ def contains_exp_op(string: str) -> bool:
 
     return False
 
-
 #  list as: [OP, first_half, second_half]
 def split_first_bool_op(source: str) -> list:
     # ! <> has to have higher precedence or it selects < first, or > same goes for <= and >=
@@ -753,8 +748,6 @@ def split_first_bool_op(source: str) -> list:
             if (source[x:x+len(operator)] == operator and nesting == 0):
 
                 return [operator, source[:x], source[x+len(operator):]]
-                
-    
 
 
 def find_close_index(start: int, string: str) -> int:
@@ -770,7 +763,6 @@ def find_close_index(start: int, string: str) -> int:
         if give == 0:
             return start + x
     return -1
-
 
 def contains_bool_op(string: str) -> bool:
 

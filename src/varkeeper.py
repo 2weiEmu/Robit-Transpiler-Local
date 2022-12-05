@@ -1,6 +1,5 @@
 class VarKeeper:
 
-
     def __init__(self):
         self.prevs = []
 

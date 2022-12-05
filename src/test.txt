@@ -1,6 +1,8 @@
-INPUT k
+x<-5
 
-FOR x <- 0 TO k
-    
-    
-NEXT
+CASE OF x+1
+    5: OUTPUT "five"
+    6: OUTPUT "six"
+    7: OUTPUT "house"
+    OTHERWISE: OUTPUT "nothing"
+ENDCASE
