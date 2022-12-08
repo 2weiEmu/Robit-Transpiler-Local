@@ -1,33 +1,18 @@
 from SyntaxNode import SyntaxNode
 from varkeeper import VarKeeper
-# TODO: make this and transpile more efficient than just a row of IF statements
-# TODO: add a parse file, that does make everything into tokens, so wecan seperate the tree building and correcting from the syntax correcting - partially to make that easier, and also more streamlined - and maybe also easier to convert to other languages.
-
 
 def build_lines_from_tree(c: SyntaxNode, exist_vars: VarKeeper) -> str:
     
-    # TODO: multiple things in the output
     # * OUTPUT 
     if c.value == "output":
         build_string = "document.getElementById(\"output\").innerHTML +="
-        for k in c.children:
-            build_string += build_lines_from_tree(k, exist_vars)
+        build_string += "".join([build_lines_from_tree(k, exist_vars) for k in c.children])
         build_string += "+\"<br>\";\n"
-        
         return build_string
 
-    # 0123456
-    # string-
     # * STRING
     elif c.value[:7] == 'string-':
-
-        build_string = "\""
-
-        build_string += c.value[7:]
-
-        build_string += "\""
-
-        return build_string
+        return f"\"{c.value[7:]}\""
 
     # * INPUT
     elif c.value == "input":
@@ -39,12 +24,6 @@ def build_lines_from_tree(c: SyntaxNode, exist_vars: VarKeeper) -> str:
             exist_vars.add_var(var_to_build)
             return f"var {var_to_build} = prompt('Input', 'Your input...');\n"
 
-        # TODO: make it so that the most recent line before is also displayed inside the prompt,
-        # TODO: to make it easier for the person what the input is wanted for.
-        # TODO: there are probably a couple ways this could be done -> but go ahead and figure it out, somehow
-        # TODO: there is probably a clever way you can think of and be proud of by the end of the day
-    # 0123
-    # var-
     # * VARIABLE
     elif c.value[:4] == "var-":
         return f"{c.value[4:]}"
@@ -52,12 +31,7 @@ def build_lines_from_tree(c: SyntaxNode, exist_vars: VarKeeper) -> str:
     # * IF-STATEMENT
     elif c.value == 'if':
 
-        build_string = "if ("
-
-        build_string += build_lines_from_tree(c.children[0], exist_vars)
-
-        build_string += ") {\n" 
-
+        build_string = f"if ({build_lines_from_tree(c.children[0], exist_vars)}"+") {\n"
         # building the sub-body.
         build_string += "\n".join([build_lines_from_tree(s, exist_vars) for s in c.children[1].children])
         
@@ -72,7 +46,6 @@ def build_lines_from_tree(c: SyntaxNode, exist_vars: VarKeeper) -> str:
     elif c.value == 'assignment':
         
         build_string = ""
-
         var_to_build = build_lines_from_tree(c.children[0], exist_vars)
         if not exist_vars.existed_before(var_to_build):
             build_string += "var "
@@ -83,14 +56,11 @@ def build_lines_from_tree(c: SyntaxNode, exist_vars: VarKeeper) -> str:
             return build_string + f"{var_to_build} = \"{build_lines_from_tree(c.children[1], exist_vars)[4:-5]}\";\n" # the 4:-5 at the end is to remove the "<p> and </p>"
         else:
             return build_string + f"{var_to_build} = {build_lines_from_tree(c.children[1], exist_vars)};\n"
-    # 012345678
-    # constant-
+
     # * NUMERIC VALUES
     elif c.value[:9] == 'constant-':
         return f"{c.value[9:]}"
 
-    # 0123
-    # exp-
     # * EXPRESSIONS
     elif c.value[:4] == 'exp-':
         print("EXPRESSION:", c)
@@ -102,8 +72,6 @@ def build_lines_from_tree(c: SyntaxNode, exist_vars: VarKeeper) -> str:
         else:
             return f"(parseInt({build_lines_from_tree(c.children[0], exist_vars)}) {operator} parseInt({build_lines_from_tree(c.children[1], exist_vars)}))"
 
-    # 0123456789
-    # condition-
     # * CONDITION
     elif c.value[:10] == 'condition-':
 
@@ -128,8 +96,7 @@ def build_lines_from_tree(c: SyntaxNode, exist_vars: VarKeeper) -> str:
     # or any of the end-statements as those are more for building the tree anyways
 
     # * DECLARE (ARRAYS)
-    elif c.value == 'array':
-        
+    elif c.value == 'array':   
         return f"var {build_lines_from_tree(c.children[0], exist_vars)} = new Array({build_lines_from_tree(c.children[2], exist_vars)} - {build_lines_from_tree(c.children[1], exist_vars)} + 1);"
 
     # * WHILE

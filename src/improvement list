@@ -1,0 +1,10 @@
+TODOs
+- Make the transpilation more efficient than a row of IF-Statements
+- Add a Parse File that makes everything into tokens, and then we can make the thing into a tree
+    so wecan seperate the tree building and correcting from the syntax correcting - partially to make
+    that easier, and also more streamlined - and maybe also easier to convert to other languages.
+
+- Multiple things (comma-seperated) in OUTPUT statements
+- Make the diagnostics (debug things) that print to the console togglable
+- Add the previously printed line as the prompt for the output to make it easier for a person to see 
+    what information is requested.
