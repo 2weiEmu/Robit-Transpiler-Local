@@ -155,10 +155,11 @@ def build_lines_from_tree(c: SyntaxNode, exist_vars: VarKeeper) -> str:
 
         for child in c.children[1:]:
             
-            if child.value == 'otherwise':
-                build_string += "default:\n{\n"
+            if child.children[0].value == 'otherwise':
+                build_string += "\ndefault:\n{\n"
+                print("Otherwise Sibling:", child.children[1])
             else:
-                build_string += "case (" + build_lines_from_tree(child.children[0], exist_vars)  + "):\n{\n"
+                build_string += "\ncase (" + build_lines_from_tree(child.children[0], exist_vars)  + "):\n{\n"
 
             build_string += "\n".join([build_lines_from_tree(s, exist_vars) for s in child.children[1].children])
 

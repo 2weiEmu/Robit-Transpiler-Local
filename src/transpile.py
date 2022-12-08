@@ -296,13 +296,14 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
                     parent=rootNode
                 )
             )
+            rootNode = rootNode.children[-1]
             # ! This technically means that you cannot actually declare arrays in CASE statements (sorry, but I don't expect anyone to do that)
             rootNode = add_to_tree(rootNode, t[1], line_number, Expected(['any']))
 
             expected.update_expected(['endcase'])
 
             # return the cond-sub-body
-            return rootNode.children[1]
+            return rootNode
 
         else:
             print(f"t -> {t}")
