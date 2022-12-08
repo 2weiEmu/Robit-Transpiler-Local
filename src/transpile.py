@@ -8,12 +8,6 @@ def is_valid_var_or_arr_index(string: str) -> bool:
 def is_all_caps(string: str):
     return string == string.upper()
 
-"""
-TODO: more strict syntax checking rules -> e.g. nothing else should be on the same line as 'ELSE'
-TODO: have to make sure that when there is an if-statement it is also closed, i.e. that there is an ENDIF, and that tabs also matter.
-But you can check on that later ->
-"""
-
 # I need to make sure that changing expected actually works.
 # time to make an expected object
 
@@ -28,11 +22,7 @@ class Expected:
     def __str__(self):
         return str(self.expected)
 
-# TODO: tab checking implementation
-# TODO: endif / endcase / endwhile checking implementation
-# I Think the EXPECTED() thing will just need more logic for that
 
-# should this have an 'expected' token -> for better error checking?
 def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: Expected) -> SyntaxNode:
     
     # filtering out comments
@@ -553,7 +543,6 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
         return rootNode
 
     # * STRINGS
-    # ! The guide says nothing about string concanetation using +, so I will not implement this.
     elif "'" in string or '"' in string:
 
         if not(in_expected(expected, 'string')):
@@ -722,7 +711,6 @@ def contains_exp_op(string: str) -> bool:
 #  list as: [OP, first_half, second_half]
 def split_first_bool_op(source: str) -> list:
     # ! <> has to have higher precedence or it selects < first, or > same goes for <= and >=
-    # TODO: come up with a better algorithm for splitting this string, because right now, this has some very specific criteria under which it works, which it should really not have
     valid_booleans = ['OR', 'NOT', '<>', '<=', '>=', '=', '>', '<', 'AND']
     # ! have to make sure its not in a bracket
 
