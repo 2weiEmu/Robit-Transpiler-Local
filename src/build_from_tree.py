@@ -130,7 +130,7 @@ def build_lines_from_tree(c: SyntaxNode, exist_vars: VarKeeper) -> str:
 
             build_string += "\n".join([build_lines_from_tree(s, exist_vars) for s in child.children[1].children])
 
-            build_string += "\n}\nbreak;"
+            build_string += "}\nbreak;"
 
         build_string += "\n}\n"
         return build_string
