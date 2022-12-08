@@ -9,6 +9,7 @@ TODOs
     and based on the order of the operations
 
 PREPROCESSING TO BE ADDED:
+- Make the line checking more advanced so that it can even point out where in the line the error happened
 - Add a Parse File that makes everything into tokens, and then we can make the thing into a tree
     so wecan seperate the tree building and correcting from the syntax correcting - partially to make
     that easier, and also more streamlined - and maybe also easier to convert to other languages.

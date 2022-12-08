@@ -1,26 +1,14 @@
 from re import match
 
+from checkError import checkError
+from Expected import Expected
 from SyntaxNode import *
 
 def is_valid_var_or_arr_index(string: str) -> bool:
     return match("[a-zA-Z0-9\[\]]", string)
 
-def is_all_caps(string: str):
-    return string == string.upper()
-
 # I need to make sure that changing expected actually works.
 # time to make an expected object
-
-class Expected:
-
-    def __init__(self, expected_list = ['any']):
-        self.expected = expected_list
-
-    def update_expected(self, new_expected):
-        self.expected = new_expected
-    
-    def __str__(self):
-        return str(self.expected)
 
 
 def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: Expected) -> SyntaxNode:
@@ -35,8 +23,8 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
     # is output statement?
     if t[0].lower() == "output":
 
-        check_standard_keyword_syntax(t[0], expected, line_number)
- 
+        checkError.check_standard_keyword_syntax(t[0], expected, line_number)
+
         rootNode.add_child(SyntaxNode(
                 'output',
                 parent=rootNode
@@ -59,7 +47,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
     # case if is input statement
     elif t[0].lower() == "input":
         
-        check_standard_keyword_syntax(t[0], expected, line_number)
+        checkError.check_standard_keyword_syntax(t[0], expected, line_number)
 
         rootNode.add_child(SyntaxNode(
                 'input',
@@ -84,7 +72,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
     # * IF-STATEMENT
     elif t[0].lower() == "if":
         
-        check_standard_keyword_syntax(t[0], expected, line_number)
+        checkError.check_standard_keyword_syntax(t[0], expected, line_number)
 
         # add 'if' node to root
         rootNode.add_child(SyntaxNode(
@@ -131,7 +119,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
             
     # * THEN
     elif t[0].lower() == 'then':
-        check_standard_keyword_syntax(t[0], expected, line_number)
+        checkError.check_standard_keyword_syntax(t[0], expected, line_number)
         
         # if found and not break -> expected back to any
         expected.update_expected(['any'])
@@ -148,7 +136,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
     # * ELSE
     elif t[0].lower() == 'else':
 
-        check_standard_keyword_syntax(t[0], expected, line_number)
+        checkError.check_standard_keyword_syntax(t[0], expected, line_number)
         
         if rootNode.parent.value != 'if':
             print(f"Else statement not inside IF block, on line: {line_number}")
@@ -170,7 +158,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
     # * ENDIF
     elif t[0].lower() == 'endif':
         
-        check_standard_keyword_syntax(t[0], expected, line_number)
+        checkError.check_standard_keyword_syntax(t[0], expected, line_number)
         
         expected.update_expected(['any'])
         
@@ -180,7 +168,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
     # * FOR-LOOP
     elif t[0].lower() == 'for':
 
-        check_standard_keyword_syntax(t[0], expected, line_number)
+        checkError.check_standard_keyword_syntax(t[0], expected, line_number)
 
         rootNode.add_child(
             SyntaxNode(
@@ -235,7 +223,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
     # * NEXT
     elif t[0].lower() == 'next':
 
-        check_standard_keyword_syntax(t[0], expected, line_number)
+        checkError.check_standard_keyword_syntax(t[0], expected, line_number)
 
         # at this point the person should be in the for-body, let's see if they actually are
         if rootNode.value != 'for-body':
@@ -268,9 +256,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
         # checking if this is the last statement
         if (k:=t[0].strip()).lower() == 'otherwise':
             
-            if not(is_all_caps(k)):
-                print(f"Syntax Error on line {line_number}, OTHERWISE is not written in all capitals")
-                exit()
+            checkError.check_is_all_caps(k, line_number)
             
             # rootNode = newest cond-body
             rootNode.add_child(
@@ -315,7 +301,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
     # * CASEOF
     elif t[0].lower() == 'case':
 
-        check_standard_keyword_syntax(t[0], expected, line_number)
+        checkError.check_standard_keyword_syntax(t[0], expected, line_number)
 
         rootNode.add_child(
             SyntaxNode(
@@ -340,7 +326,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
     # * ENDCASE
     elif t[0].lower() == 'endcase':
 
-        check_standard_keyword_syntax(t[0], expected, line_number)
+        checkError.check_standard_keyword_syntax(t[0], expected, line_number)
         
         expected.update_expected(['any'])
 
@@ -358,7 +344,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
     # * REPEAT
     elif t[0].lower() == 'repeat':
 
-        check_standard_keyword_syntax(t[0], expected, line_number)
+        checkError.check_standard_keyword_syntax(t[0], expected, line_number)
 
         # create a new repeat child for the main branch thing
         rootNode.add_child(
@@ -385,7 +371,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
     # * UNTIL
     elif t[0].lower() == 'until':
 
-        check_standard_keyword_syntax(t[0], expected, line_number)
+        checkError.check_standard_keyword_syntax(t[0], expected, line_number)
 
         # rootnode should in this case be a repeat-body, and the parent of that a repeat node (though they technically come in pairs, but still better to make sure)
         
@@ -411,7 +397,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
     # case if is while statement
     elif t[0].lower() == "while":
 
-        check_standard_keyword_syntax(t[0], expected, line_number)
+        checkError.check_standard_keyword_syntax(t[0], expected, line_number)
 
         rootNode.add_child(
             SyntaxNode(
@@ -420,7 +406,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
             )
         )
 
-        check_standard_keyword_syntax(t[-1], Expected(['do']), line_number)
+        checkError.check_standard_keyword_syntax(t[-1], Expected(['do']), line_number)
         
         rest_string = " ".join(t[1:-1])
 
@@ -443,7 +429,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
     # * ENDWHILE
     elif t[0].lower() == "endwhile":
 
-        check_standard_keyword_syntax(t[0], expected, line_number)
+        checkError.check_standard_keyword_syntax(t[0], expected, line_number)
 
         if rootNode.value != 'while-body':
             print(f"ENDWHILE on line {line_number} is not in a WHILE statement body.")
@@ -458,7 +444,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
     # * DECLARE
     elif t[0].lower() == "declare":
 
-        check_standard_keyword_syntax(t[0], expected, line_number)
+        checkError.check_standard_keyword_syntax(t[0], expected, line_number)
         
         rest_declare = " ".join(t[1:])
         # {VARIABLE}: ARRAY[EXP:EXP] OF {TYPE}
@@ -492,10 +478,8 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
     
     # * ASSIGNMENT
     elif "<-" in string:
-
-        if not(in_expected(expected, 'assignment')):
-            print(f"Unexpected Assignment on line {line_number}, instead expected: {expected.expected}")
-            exit()
+        
+        checkError.check_in_expected('assignment', expected, line_number)
 
         rootNode.add_child(
             SyntaxNode(
@@ -524,14 +508,8 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
     # * TYPES
     elif string.lower() in ['integer', 'char', 'real', 'string', 'boolean']:
 
-
-        if not(is_all_caps(string)):
-            print(f"The type given on {line_number} was not in all capitals.")
-            exit()
-        
-        if not(in_expected(expected, 'type')):
-            print(f"Unexpected type on line {line_number}")
-            exit()
+        checkError.check_in_expected('type', expected, line_number)
+        checkError.check_is_all_caps(string, line_number)
         
         rootNode.add_child(
             SyntaxNode(
@@ -545,9 +523,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
     # * STRINGS
     elif "'" in string or '"' in string:
 
-        if not(in_expected(expected, 'string')):
-            print(f"Unexpected STRING on line: {line_number}, instead expected: {expected.expected}")
-            exit()
+        checkError.check_in_expected('string', expected, line_number)
 
         string = string.strip()
         if "'" in string:
@@ -581,9 +557,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
     # ! don't forget that in booleans here != actually is written as <>
     elif contains_bool_op(string):
         
-        if not(in_expected(expected, 'condition')):
-            print(f"Unexpected CONDITION on line {line_number}, instead expected one of: {expected.expected}")
-            exit()
+        checkError.check_in_expected('condition', expected, line_number)
 
         # ! time to care about brackets.
         # ! there may also be issues that occur when putting lone values directly inside brackets i.e. like 5 <> (CAR), don't do that
@@ -617,10 +591,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
 
     # * EXPRESSIONS
     elif contains_exp_op(string):
-        
-        if not(in_expected(expected, 'expression')):
-            print(f"Unexpected EXPRESSION on line {line_number}, instead expected one of: {expected.expected}")
-            exit()
+        checkError.check_in_expected('expression', expected, line_number)
         
         if string.count("(") != string.count(")"):
             print(f"You have unmatched brackets in your expression on line: {line_number}")
@@ -651,9 +622,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
     # * NUMERIC VALUE
     elif match("^[0-9]+$", string):
         
-        if not(in_expected(expected, 'expression')):
-            print(f"Unexpected CONSTANT on line {line_number}, instead expected one of: {expected.expected}")
-            exit()
+        checkError.check_in_expected('expression', expected, line_number)
 
         rootNode.add_child(
             SyntaxNode(
@@ -665,9 +634,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
     # * VARIABLE
     elif is_valid_var_or_arr_index(string):
 
-        if not(in_expected(expected, 'var')):
-            print(f"Unexpected VARIABLE ({string}) on line {line_number}, instead expected one of: {expected.expected}")
-            exit()
+        checkError.check_in_expected('var', expected, line_number)
         
         rootNode.add_child(
             SyntaxNode(
@@ -763,19 +730,3 @@ def contains_bool_op(string: str) -> bool:
             return True
 
     return False
-
-def in_expected(expected: Expected, keyword):
-
-    return (keyword.lower() in expected.expected or expected.expected[0] == 'any')
-
-def check_standard_keyword_syntax(keyword: str, expected: Expected, line_number: int) -> bool: 
-    
-    if not(is_all_caps(keyword)):
-        print(f"Syntax Error on Line {line_number}: '{keyword.upper()}' not in all capitals.")
-        exit()
-    
-    if not(in_expected(expected, keyword)):
-        print(f"Unexpected Keyword: {keyword.upper()} on line {line_number}, instead expected one of the following: {expected}")
-        exit()
-    
-    return True
