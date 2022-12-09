@@ -7,9 +7,6 @@ from varkeeper import VarKeeper
 
 import os
 
-# TODO: Make sure that transpile can parse negative numbers (it cannot do n <- -1, so fix that, check the negative case)
-# TODO: String is struggling to deal with something like "X's value is:"
-
 with open('test.txt', 'r') as readFile:
     l = readFile.readlines()
     lines = [c.strip() for c in l]

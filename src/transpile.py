@@ -7,9 +7,6 @@ from SyntaxNode import *
 def is_valid_var_or_arr_index(string: str) -> bool:
     return match("[a-zA-Z0-9\[\]]", string)
 
-# I need to make sure that changing expected actually works.
-# time to make an expected object
-
 
 def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: Expected) -> SyntaxNode:
     
