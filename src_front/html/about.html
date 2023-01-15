@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+
+<html>
+
+    <head>
+        
+
+        <link rel="stylesheet" type="text/css" href="../css/style.css">
+        
+    </head>
+
+
+    <body>
+        <header>
+            <div class="navbar">
+                <div class="leftnav">
+                    <a class="navbutton" href="index.html"><div>Robit Transpiler</div></a>
+                </div>
+                <div class="rightnav">
+                    <a class="navbutton" href="about.html" style="background-color: #5E7ADA;"><div>About</div></a>
+                    <a class="navbutton" href="feedback.html"><div>Feedback</div></a>
+                </div>
+            </div>
+        </header>
+
+        <div id='about' class="background_tile" style="width: 49.2708333%; padding: 5px; font-size: medium;">
+            <h1>Failed to fetch the newest 'About' information.</h1>
+        </div>
+    </body>
+
+    <footer>
+        
+    </footer>
+
+    <style>
+        h1 {
+            text-align: center;
+        }
+        p {
+            font-family: Arial, Helvetica, sans-serif;
+            text-align: left;
+            line-height: 1.5;
+        }
+    </style>
+
+    <script>
+        // for the record I have no idea if this works
+        function getNewestAbout() {
+            $.get("http://127.0.0.1:8000/update_about", function(data, status) {
+                document.getElementById("about").innerHTML = data;
+            })
+        }
+
+        getNewestAbout();
+    </script>
+
+</html>

@@ -41,3 +41,4 @@ print(l)
 l.append("\n}")
 with open("temp.js", "w") as javascript:
     javascript.writelines(l)
+

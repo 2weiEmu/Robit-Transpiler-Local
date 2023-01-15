@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+
+<html>
+
+    <head>
+        
+
+        <link rel="stylesheet" type="text/css" href="../css/style.css">
+        
+    </head>
+
+
+    <body>
+        <header>
+            <div class="navbar">
+                <div class="leftnav">
+                    <a class="navbutton" href="index.html" style="background-color: #5E7ADA;"><div>Robit Transpiler</div></a>
+                </div>
+                <div class="rightnav">
+                    <a class="navbutton" href="about.html"><div>About</div></a>
+                    <a class="navbutton" href="feedback.html"><div>Feedback</div></a>
+                </div>
+            </div>
+        </header>
+
+        <div id="indexcontent">
+            <div id="code_box">
+                <div class="background_tile">
+                    <textarea id='code' placeholder="Your code goes here..."></textarea>
+                </div>
+            </div>
+
+            <div id="run_wrapper">
+                <div></div>
+                <div id="run_button">
+                    RUN
+                </div>
+            </div>
+
+            <div id="result_box">
+                <div id="code_result" class="background_tile">
+                    <textarea readonly id="result" placeholder="The result of the code goes here..."></textarea>
+                </div>
+            </div>
+        </div>
+
+    </body>
+
+    <footer>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+        <script src="../node_modules/jquery/dist/jquery.min.js"></script>
+        <script src="../js/index.js"></script>
+    </footer>
+
+    <div id="temp">
+
+    </div>
+
+</html>

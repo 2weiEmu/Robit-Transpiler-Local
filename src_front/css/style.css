@@ -1,0 +1,123 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    background-color: #5E7ADA;
+}
+
+p {
+    font-family: 'IBM Plex Mono', monospace;
+    text-align: center;
+}
+
+a {
+    text-decoration: none;
+    color: #F6F6F6;
+}
+
+.navbar {
+    background-color: #FFB26A;
+    width: 100vw;
+    min-height: 70px;
+
+    display: grid;
+    grid-template-columns: 50% 50%;
+}
+
+.navbar a {
+    font-size: 36px;
+    font-weight: bold;
+    padding-left: clamp(5px, 10%, 10px);
+    padding-right: clamp(5px, 10%, 10px);
+    height: 100%;
+    padding-top: 14px; /* Make this calculated */
+}
+
+.leftnav {
+    display: flex;
+}
+
+.rightnav {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.background_tile {
+    background-color: #F6F6F6;
+    width: 71.95402298850575%;
+    height: 79.30693069306931%;
+    margin: auto;
+    margin-top: 10.346534653465348%;
+    margin-bottom: 10.346534653465348%;
+    box-shadow: 0px 10px 15px 15px rgba(0, 0, 0, 0.25);
+    font-size: 36px;
+}
+
+textarea {
+    border: none;
+    box-shadow: 0px 10px 15px 15px rgba(0, 0, 0, 0.25);
+    width: 91.0543131%;
+    margin-left: 3.4728434%;
+    margin-right: 3.4728434%;
+    padding-left: 1%;
+    padding-right: 1%;
+    height: 92.1348315%;
+    margin-top: 3.9325843%;
+    margin-bottom: 3.9325843%;
+    resize: none;
+    font-size: 24px;
+    font-family: 'IBM Plex Mono', monospace;
+}
+
+.navbutton {
+    background-color: none;
+    transition: 0.2s all ease-out;
+}
+
+.navbutton:hover {
+    background-color: #5E7ADA;
+}
+
+/* Some specific index.html styles */
+#indexcontent {
+    display: grid;
+    grid-template-columns: 45.3125% 9.375% 45.3125%;
+    height: calc(100vh - 70px);
+}
+
+#code_box {
+    margin: 0; padding: 0;
+}
+
+#code_result { 
+    background-color: #FFB26A;
+}
+
+
+
+/* #run_button {
+    font-family: 'IBM Plex Mono', monospace;
+    text-align: center;
+    background-color: #91FF6A;
+    
+    /* height: 10%;
+*/
+
+#run_wrapper {
+    display: grid;
+    grid-template-rows: 41.25% 15% 41.25%;
+}
+
+#run_button {
+    font-family: 'IBM Plex Mono', monospace;
+    text-align: center;
+    background-color: #91FF6A;
+    font-size: 24px;
+    box-shadow: 0px 10px 15px 15px rgba(0, 0, 0, 0.25);
+    padding-top: 50%;
+    padding-bottom: 50%;
+    line-height: 0;
+}
