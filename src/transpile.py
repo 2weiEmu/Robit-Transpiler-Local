@@ -12,6 +12,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
     
     # filtering out comments
     string = string.split("//")[0]
+    string = string.strip("\\t")
 
     t = string.split()
     if t==[]:
@@ -58,13 +59,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
 
     # * ENDWHILE
     elif t[0].lower() == "endwhile":
-
-        if is_all_caps(t[0]):
-            pass
-
-        else:
-            print(f"Syntax Error on Line {line_number}: 'ENDWHILE' not in all capitals.")
-            exit()
+        checkError.check_is_all_caps(t[0], line_number)
 
     # * IF-STATEMENT
     elif t[0].lower() == "if":
@@ -93,7 +88,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
         # is next node then node?
         if t[-1].lower() == "then":
             
-            if not(is_all_caps(t[-1])):
+            if not(checkError.check_is_all_caps(t[-1], line_number)):
                 print(f"Syntax Error on Line {line_number}: 'THEN' not in all capitals.")
                 exit()
             

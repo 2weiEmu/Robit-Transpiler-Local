@@ -35,29 +35,37 @@ function collectCode() {
     url: "http://127.0.0.1:8000/entered_code",
     data: code_data,
     success: function (result) {
-      var script_area = document.createElement("script");
-      script_area.type = "text/javascript";
-      script_area.id = "transpiled";
       result = result.slice(2);
       result = result.slice(0, -2);
-      result = result.split('","')
+      result = result.split('","');
       console.log(result);
-      script_area.innerHTML = "function execute_transpiled() {\n";
-      for (var i = 0; i < result.length; i++) {
-        script_area.innerHTML += String(result[i]) + "\n";
-      }
-      script_area.innerHTML += "console.log('completed');}";
+      if (result[0] === 'robit_trp_failure') {
+        document.getElementById("result").innerHTML = result[0] + '\n' + result[1];
       
-      document.getElementById("temp").innerHTML = "";
-      result_area.innerHTML = "";
-      document.getElementById("temp").appendChild(script_area);
-
-      run_button.style.backgroundColor = "#FF6A6A"
-      run_button.innerHTML = "RUNNING"
-      execute_transpiled();
-
-      run_button.style.backgroundColor = "#91FF6A"
-      run_button.innerHTML = "RUN"
+        run_button.style.backgroundColor = "#91FF6A"
+        run_button.innerHTML = "RUN"
+      }
+      else {
+        var script_area = document.createElement("script");
+        script_area.type = "text/javascript";
+        script_area.id = "transpiled";
+        script_area.innerHTML = "function execute_transpiled() {\n";
+        for (var i = 0; i < result.length; i++) {
+          script_area.innerHTML += String(result[i]) + "\n";
+        }
+        script_area.innerHTML += "console.log('completed');}";
+        
+        document.getElementById("temp").innerHTML = "";
+        result_area.innerHTML = "";
+        document.getElementById("temp").appendChild(script_area);
+  
+        run_button.style.backgroundColor = "#FF6A6A"
+        run_button.innerHTML = "RUNNING"
+        execute_transpiled();
+        run_button.style.backgroundColor = "#91FF6A"
+        run_button.innerHTML = "RUN"
+      }
+      
     },
     dataType: 'text'
   }

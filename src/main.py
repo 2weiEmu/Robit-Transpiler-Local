@@ -61,7 +61,7 @@ async def eval_entered_code(request: Request):
     
     try:
         returnCode = transpile(data)
-    except:
-        pass
+    except Exception as e:
+        returnCode = ['robit_trp_failure', str(e)]
 
     return returnCode
