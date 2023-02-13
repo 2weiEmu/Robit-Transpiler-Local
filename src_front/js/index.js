@@ -24,9 +24,13 @@ var result_area = document.getElementById("result");
 
 run_button.addEventListener("click", collectCode);
 
+function update_run_button(run_button, text, colour) {
+  run_button.style.backgroundColor = colour;
+  run_button.innerHTML = text;
+}
+
 function collectCode() {
-  run_button.style.backgroundColor = "#FFE76A";
-  run_button.innerHTML = "TRANSPILING"
+  update_run_button(run_button, "TRANSPILING", "FFE76A")
 
   code_data = code_editor.value;
   console.log(code_data)
@@ -41,9 +45,8 @@ function collectCode() {
       console.log(result);
       if (result[0] === 'robit_trp_failure') {
         document.getElementById("result").innerHTML = result[0] + '\n' + result[1];
-      
-        run_button.style.backgroundColor = "#91FF6A"
-        run_button.innerHTML = "RUN"
+        
+        update_run_button(run_button, "RUN", "#91FF6A");
       }
       else {
         var script_area = document.createElement("script");
@@ -59,13 +62,16 @@ function collectCode() {
         result_area.innerHTML = "";
         document.getElementById("temp").appendChild(script_area);
   
-        run_button.style.backgroundColor = "#FF6A6A"
-        run_button.innerHTML = "RUNNING"
+        update_run_button(run_button, "RUNNING", "#FF6A6A");
         execute_transpiled();
-        run_button.style.backgroundColor = "#91FF6A"
-        run_button.innerHTML = "RUN"
+        update_run_button(run_button, "RUN", "#91FF6A");
       }
       
+    },
+    timeout: 3000,
+    error: function(request, status, error) {
+      result_area.innerHTML = "The Transpile has failed. (The Server is probably unavailable)."
+      update_run_button(run_button, "RUN", "#91FF6A");
     },
     dataType: 'text'
   }

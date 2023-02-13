@@ -1,8 +1,2 @@
 x<-1
-
-CASE OF x
-    5: OUTPUT "five"
-    6: OUTPUT "six"
-    7: OUTPUT "house"
-    OTHERWISE: OUTPUT "nothing"
-ENDCASE
+OUTpUT x

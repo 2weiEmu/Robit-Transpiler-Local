@@ -48,13 +48,19 @@ def transpile(transmitted: str) -> str:
     
     return l
 
-@app.post("/entered_code")
-async def eval_entered_code(request: Request):
+def get_request_body(body):
 
-    data = str(await request.body())[2:-1]
+    data = str(body)[2:-1]
 
     data = data.split("\\n")
     data = "\n".join(data)
+
+    return data
+
+@app.post("/entered_code")
+async def eval_entered_code(request: Request):
+
+    data = get_request_body(await request.body())
     # print(data)
     # with open("temp.txt", "w") as write_file:
     #     write_file.writelines(data)
@@ -65,3 +71,11 @@ async def eval_entered_code(request: Request):
         returnCode = ['robit_trp_failure', str(e)]
 
     return returnCode
+
+# TODO: Implement a feature so that you can print the syntax tree.
+# @app.post("/syntax_tree")
+# async def eval_entered_to_syntax_tree(request: Request):
+
+#     data = get_request_body(await request.body())
+
+

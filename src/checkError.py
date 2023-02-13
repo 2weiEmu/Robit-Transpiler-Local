@@ -2,6 +2,7 @@ from Expected import Expected
 
 class checkError:
 
+    # ! This can be removed once we start using the RegEx method, because RegEx automatically checks for all-capitals (at least the one I wrote)
     @staticmethod
     def check_is_all_caps(keyword: str, line_number: int) -> bool:
         if (keyword != keyword.upper()):

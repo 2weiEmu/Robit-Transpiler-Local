@@ -9,6 +9,8 @@ TODOs
     and based on the order of the operations
 - Improve the number processing (especially for negative numbers, which it's having trouble with)
 - Improve the string processing (e.g. something like "X's value is 5") is breaking
+- Make it so that the user can print the syntax tree, and see that
+- Move everything to be loaded using the FastAPI, so that we don't have to have a separate front and backend, and everything is just loaded using the FastAPI application, easily and quickly.
 
 PREPROCESSING TO BE ADDED:
 - Make the line checking more advanced so that it can even point out where in the line the error happened

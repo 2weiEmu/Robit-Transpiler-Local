@@ -8,18 +8,58 @@ def is_valid_var_or_arr_index(string: str) -> bool:
     return match("[a-zA-Z0-9\[\]]", string)
 
 
+"""
+The plan for this add_to_tree function.
+There are a couple RegEx patterns against which it will match.
+If none of the patterns matches, it will go through preset patterns, and a slower
+algorithm in order to find which pattern it matches most closely (some manually defined)
+rules, in order to throw a more informative error for the user. This should not compromise on performance
+for actually working code, because if your code does not transpile, then like... yes.
+"""
+
 def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: Expected) -> SyntaxNode:
     
-    # filtering out comments
+    # filtering out comments, tabs and spaces (at either end)
     string = string.split("//")[0]
     string = string.strip("\\t")
+    string = string.strip(" ")
 
+    print(f"add_to_tree Pass on: {string}\nExpected: {expected.expected}")
+
+    # Skip if the line is empty
     t = string.split()
     if t==[]:
         return rootNode
+
+    statement_regexs = [
+        r"^OUTPUT\s+[a-zA-Z0-9\"\"\[\]\s,]+$":,
+        r"^INPUT\s+[a-zA-Z0-9\[\]]+$":,
+        r"^ENDWHILE$":,
+        r"^IF\s+.+$|^IF\s+.+\s+THEN$":,
+        r"^THEN$":,
+        r"^ELSE$":,
+        r"^ENDIF$":,
+        r"^FOR\s+.+<-.+\s+TO\s+[a-zA-Z0-9\+\*\-/\[\]\"\"]+(\s+STEP\s+.+)?$":,
+        r"^NEXT$":,
+        r"^CASE OF\s+.+$":,
+        r"^ENDCASE$":,
+        r"^REPEAT$":,
+        r"^UNTIL\s+.+$":,
+        r"^WHILE\s+.+\s+DO$":,
+        r"^DECLARE\s+.+\s*:\s*ARRAY\s+\[.+:.+\]\s+OF\s+.+$":,
+        r"^.+<-.+$":,
+        r"^INTEGER$|^CHAR$|^REAL$|^STRING$|^BOOLEAN$":,
+        r"^\"[^\"]*\"$":,
+        r"^.+((\s+OR\s+)|(\s+AND\s+)|(<>)|(<=)|(>=)|(\<[^-])|[\>\=]){1}.+$|^TRUE$|^FALSE$|^NOT\s+.+$":,
+        r"":,
+        r"^[0-9]+$":,
+        r"^[a-zA-Z]{1}[a-zA-Z0-9\[\]]*$":,
+    ]
+
     # * OUTPUT
     # is output statement?
-    if t[0].lower() == "output":
+    # Regex for OUTPUT: ^OUTPUT\s+[a-zA-Z0-9\"\"\[\]\s,]+$
+    if match(r"^OUTPUT\s+[a-zA-Z0-9\"\"\[\]\s,]+$", string):
 
         checkError.check_standard_keyword_syntax(t[0], expected, line_number)
 
@@ -28,12 +68,12 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
                 parent=rootNode
             ))
 
-        string = " ".join(t[1:])
-        string = string.split(",")
+        string = " ".join(t[1:]) # Joing everything except the OUTPUT statement
+        string = string.split(",") # Split at the commas
 
         for s in string:
             s = s.strip()
-            add_to_tree(
+            add_to_tree( # Add a new node to the tree for every argument that the OUTPUT call receives
                 rootNode.children[-1], # adding to the last child of the rootnode (the one we just created)
                 s, line_number, 
                 expected=Expected(['expression', 'string', 'var', 'condition'])
@@ -43,7 +83,8 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
 
     # * INPUT
     # case if is input statement
-    elif t[0].lower() == "input":
+    # Regex for INPUT: ^INPUT\s+[a-zA-Z0-9\[\]]+$
+    elif match(r"^INPUT\s+[a-zA-Z0-9\[\]]+$", string):
         
         checkError.check_standard_keyword_syntax(t[0], expected, line_number)
 
@@ -58,11 +99,13 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
         return rootNode
 
     # * ENDWHILE
-    elif t[0].lower() == "endwhile":
+    # Regex for ENDWHILE: ^ENDWHILE$
+    elif match(r"^ENDWHILE$", string):
         checkError.check_is_all_caps(t[0], line_number)
 
     # * IF-STATEMENT
-    elif t[0].lower() == "if":
+    # Regex for IF: ^IF\s+.+$|^IF\s+.+\s+THEN$
+    elif match(r"^IF\s+.+$|^IF\s+.+\s+THEN$", string):
         
         checkError.check_standard_keyword_syntax(t[0], expected, line_number)
 
@@ -110,7 +153,8 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
             return rootNode
             
     # * THEN
-    elif t[0].lower() == 'then':
+    # Regex for then: ^THEN$
+    elif match(r"^THEN$", string):
         checkError.check_standard_keyword_syntax(t[0], expected, line_number)
         
         # if found and not break -> expected back to any
@@ -126,7 +170,8 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
         return rootNode.children[1]
 
     # * ELSE
-    elif t[0].lower() == 'else':
+    # RegEx for else: ^ELSE$
+    elif match(r"^ELSE$", string):
 
         checkError.check_standard_keyword_syntax(t[0], expected, line_number)
         
@@ -148,7 +193,8 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
         return rootNode
 
     # * ENDIF
-    elif t[0].lower() == 'endif':
+    # RegEx for ENDIF: ^ENDIF$
+    elif match(r"^ENDIF$", string):
         
         checkError.check_standard_keyword_syntax(t[0], expected, line_number)
         
@@ -158,7 +204,8 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
         return rootNode.parent.parent
     
     # * FOR-LOOP
-    elif t[0].lower() == 'for':
+    # RegEx for for loop: ^FOR\s+.+<-.+\s+TO\s+[a-zA-Z0-9\+\*\-/\[\]\"\"]+(\s+STEP\s+.+)?$
+    elif match(r"^FOR\s+.+<-.+\s+TO\s+[a-zA-Z0-9\+\*\-/\[\]\"\"]+(\s+STEP\s+.+)?$", string):
 
         checkError.check_standard_keyword_syntax(t[0], expected, line_number)
 
@@ -213,7 +260,8 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
             return rootNode.children[-1] # otherwise return the for-body as it was the last one (if no step was added)
 
     # * NEXT
-    elif t[0].lower() == 'next':
+    # RegEx for next: ^NEXT$
+    elif match(r"^NEXT$", string):
 
         checkError.check_standard_keyword_syntax(t[0], expected, line_number)
 
@@ -230,7 +278,8 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
         return rootNode.parent.parent
 
     # * CASE
-    if expected.expected[0] == 'case':
+    # RegEX for CASE: 
+    elif expected.expected[0] == 'case':
         
         rootNode.add_child(
             SyntaxNode(
@@ -291,7 +340,8 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
             return rootNode.parent.parent
 
     # * CASEOF
-    elif t[0].lower() == 'case':
+    # RegEx for CASEOF: ^CASE OF\s+.+$
+    elif match(r"^CASE OF\s+.+$", string):
 
         checkError.check_standard_keyword_syntax(t[0], expected, line_number)
 
@@ -316,7 +366,8 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
 
     # in this case we have to check for the expected, because the line does not really have a strong identifier, for that
     # * ENDCASE
-    elif t[0].lower() == 'endcase':
+    # RegEx for endcase: ^ENDCASE$
+    elif match(r"^ENDCASE$", string):
 
         checkError.check_standard_keyword_syntax(t[0], expected, line_number)
         
@@ -334,7 +385,8 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
         return rootNode.parent.parent.parent
 
     # * REPEAT
-    elif t[0].lower() == 'repeat':
+    # RegEx for REPEAT: ^REPEAT$
+    elif match(r"^REPEAT$", string):
 
         checkError.check_standard_keyword_syntax(t[0], expected, line_number)
 
@@ -361,7 +413,8 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
         return rootNode.children[-1]
 
     # * UNTIL
-    elif t[0].lower() == 'until':
+    # RegEx for Until: ^UNTIL\s+.+$
+    elif match(r"^UNTIL\s+.+$", string):
 
         checkError.check_standard_keyword_syntax(t[0], expected, line_number)
 
@@ -387,7 +440,8 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
 
     # * WHILE
     # case if is while statement
-    elif t[0].lower() == "while":
+    # RegEx for While: ^WHILE\s+.+\s+DO$
+    elif match(r"^WHILE\s+.+\s+DO$", string):
 
         checkError.check_standard_keyword_syntax(t[0], expected, line_number)
 
@@ -418,23 +472,9 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
 
         return rootNode.children[-1] # returning the while-body
 
-    # * ENDWHILE
-    elif t[0].lower() == "endwhile":
-
-        checkError.check_standard_keyword_syntax(t[0], expected, line_number)
-
-        if rootNode.value != 'while-body':
-            print(f"ENDWHILE on line {line_number} is not in a WHILE statement body.")
-            exit()
-
-        if rootNode.parent.value != 'while':
-            print(f"ENDWHILE on line {line_number} is not in WHILE statement.")
-        
-        # going back to parent of the while statement (current rootNode = while-body)
-        return rootNode.parent.parent
-
     # * DECLARE
-    elif t[0].lower() == "declare":
+    # RegEx for Declare (declaring an array): ^DECLARE\s+.+\s*:\s*ARRAY\s+\[.+:.+\]\s+OF\s+.+$
+    elif match(r"^DECLARE\s+.+\s*:\s*ARRAY\s+\[.+:.+\]\s+OF\s+.+$", string):
 
         checkError.check_standard_keyword_syntax(t[0], expected, line_number)
         
@@ -469,7 +509,8 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
         return rootNode
     
     # * ASSIGNMENT
-    elif "<-" in string:
+    # RegEx for assignment: ^.+<-.+$ 
+    elif match(r"^.+<-.+$", string):
         
         checkError.check_in_expected('assignment', expected, line_number)
 
@@ -498,7 +539,8 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
         return rootNode.parent # Return the parent of the assignment node
 
     # * TYPES
-    elif string.lower() in ['integer', 'char', 'real', 'string', 'boolean']:
+    # RegEx for types: ^INTEGER$|^CHAR$|^REAL$|^STRING$|^BOOLEAN$
+    elif match(r"^INTEGER$|^CHAR$|^REAL$|^STRING$|^BOOLEAN$", string):
 
         checkError.check_in_expected('type', expected, line_number)
         checkError.check_is_all_caps(string, line_number)
@@ -513,7 +555,8 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
         return rootNode
 
     # * STRINGS
-    elif "'" in string or '"' in string:
+    # RegEx for Strings: ^\"[^\"]*\"$
+    elif match(r"^\"[^\"]*\"$", string):
 
         checkError.check_in_expected('string', expected, line_number)
 
@@ -547,7 +590,11 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
     # * CONDITION
     # ok wait, seeing as we use '=' to check for equality here, we can actually check for that, and the other symbols as they are also unique to this, and other places where it could have come up were already checked
     # ! don't forget that in booleans here != actually is written as <>
-    elif contains_bool_op(string):
+    # RegEx for CONDITION: ^.+((\s+OR\s+)|(\s+AND\s+)|(<>)|(<=)|(>=)|[\>\<\=]){1}.+$|^TRUE$|^FALSE$|^NOT\s+.+$
+    # this RegEx has been deemed good enough for now, obv there are improvements that can be made for more specific testing for all of them
+    # so that I have to do even less checking for syntax mistakes
+    # fuck this one has bad bracket matching. Or - to be more precise, it works, but like... yea it won't match the right one
+    elif match(r"^.+((\s+OR\s+)|(\s+AND\s+)|(<>)|(<=)|(>=)|(\<[^-])|[\>\=]){1}.+$|^TRUE$|^FALSE$|^NOT\s+.+$", string):
         
         checkError.check_in_expected('condition', expected, line_number)
 
@@ -582,6 +629,7 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
         return rootNode.parent
 
     # * EXPRESSIONS
+    # RegEx for Expressions: 
     elif contains_exp_op(string):
         checkError.check_in_expected('expression', expected, line_number)
         
@@ -612,7 +660,8 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
         return rootNode.parent
     
     # * NUMERIC VALUE
-    elif match("^[0-9]+$", string):
+    # Regex For Numberic Value: ^[0-9]+$
+    elif match(r"^[0-9]+$", string):
         
         checkError.check_in_expected('expression', expected, line_number)
 
@@ -626,7 +675,9 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
         return rootNode
 
     # * VARIABLE
-    elif is_valid_var_or_arr_index(string):
+    # Regex for Variable: ^[a-zA-Z]{1}[a-zA-Z0-9\[\]]*$
+    elif match(r"^[a-zA-Z]{1}[a-zA-Z0-9\[\]]*$", string):
+    # elif is_valid_var_or_arr_index(string):
 
         checkError.check_in_expected('var', expected, line_number)
         
@@ -638,11 +689,10 @@ def add_to_tree(rootNode: SyntaxNode, string: str, line_number: int, expected: E
         )
         
         return rootNode
-    # Now the missing statements:
-    # variables -> we already have a variable check thing
 
-    # * if its nothing valid, we just kinda skip... I guess...
-    return rootNode
+    # TODO If nothing is valid we call the large compare function, and will end up throwing an informative error please
+    identify_potential_error(string, line_number, expected)
+    
 
 def split_first_exp_op(source: str) -> list:
     valid_exps = ["MOD", "-", "+", "*", "DIV", "/"]
@@ -669,6 +719,7 @@ def contains_exp_op(string: str) -> bool:
 
     return False
 
+
 #  list as: [OP, first_half, second_half]
 def split_first_bool_op(source: str) -> list:
     # ! <> has to have higher precedence or it selects < first, or > same goes for <= and >=
@@ -685,6 +736,9 @@ def split_first_bool_op(source: str) -> list:
     # TODO: and even if I added .strip() this would still break it: ((car AND) fish)
     # TODO: now we can fight over if that would be a valid statement.
 
+    # TODO: make sure that it basically has an array of values sorted by the depth in the brackets (in valid bracket combinations)
+    # TODO: meaning, also check that all brackets match, and then basically select the one with the lowest depth, as technically the one with depth 0
+    # TODO: isn't guaranteed to exist (ok maybe it is, because I always remove all the brackets, but you catch my drift, it would make life easier)
     # basically make sure that it does not take into account things inside a bracket (i.e. nested)
     for operator in valid_booleans:
         nesting = 0
@@ -714,13 +768,9 @@ def find_close_index(start: int, string: str) -> int:
             return start + x
     return -1
 
-def contains_bool_op(string: str) -> bool:
 
-    # all the valid boolean operators (<> = !=)
-    valid_booleans = ['AND', 'OR', 'NOT', '>', '<', '<=', '>=', '=', '<>', 'TRUE', 'FALSE']
+def identify_potential_error(string: str, line_number: int, expected: Expected):
+    
+    # we don't have to really check expectation matching, because that is taken care of in each matching
 
-    for v in valid_booleans:
-        if v in string:
-            return True
-
-    return False
+    raise Exception(f"Could not identify potential Error, though there is a mistake on Line: {line_number}\n at \"{string}\"")
